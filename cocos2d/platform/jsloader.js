@@ -135,7 +135,22 @@
         'tileMap_parallax_nodes/CCTMXLayer.js',
         'tileMap_parallax_nodes/CCParallaxNode.js',
         'base_nodes/CCdomNode.js',
-        '../CocosDenshion/SimpleAudioEngine.js'
+        '../CocosDenshion/SimpleAudioEngine.js',
+        'ui/CCUI.js',
+        'ui/CCUIDevice.js',
+        'ui/CCUIConstants.js',
+        'ui/CCUIBorder.js',
+        'ui/borders/CCUILineBorder.js',
+        'ui/CCUIComponent.js',
+        'ui/CCUIBox.js',
+        'ui/boxes/CCUIVBox.js',
+        'ui/boxes/CCUIHBox.js',
+        'ui/boxes/CCUIGridBox.js',
+        'ui/boxes/CCUIFlowBox.js',
+        'ui/boxes/CCUIBorderBox.js',
+        'ui/boxes/CCUICardBox.js',
+        'ui/boxes/CCUIAbsoluteBox.js',
+        'ui/CCUIWindow.js'
     ];
 
     var d = document;
