@@ -51,7 +51,7 @@ cc.ui.Box = cc.ui.Component.extend({
         this._super();
 
         // Boxes stretch by default
-        this.$stretches = true;
+        this.$stretches = false;
 
         this.$wrapTraverse = new Array();
         this.$wrapTraverse[cc.ui.Constants.TRVS_DOWN] = false;

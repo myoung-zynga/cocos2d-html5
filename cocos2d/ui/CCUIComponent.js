@@ -146,6 +146,8 @@ cc.ui.Component = cc.Node.extend({
         this.$colors = new Array();
         this.$colors[cc.ui.Constants.COLOR_FG] = "0xff000000";
         this.$images = new Array();
+
+        this.setAnchorPoint(0, 0);
     },
     
    
@@ -579,20 +581,16 @@ cc.ui.Component = cc.Node.extend({
      *               the layout subsystem
      */
     stretchAndAlign : function(width, height) {
-        if (this.$stretches) {
-            // FIXME: move away from direct variable access on JS and use
-            // methods to work correctly on Cocos2DX
-            if (this._contentSize.width < width) {
-                var delta = width - this._contentSize.width;
-                this.$ibounds.w += delta;
-                this._contentSize.width = width;
-            }
-            if (this._contentSize.height < height) {
-                var delta = height - this._contentSize.height;
-                this.$ibounds.h += delta;
-                this._contentSize.height = height;
-            }
-        }       
+        if (this._contentSize.width != width) {
+            var delta = width - this._contentSize.width;
+            this.$ibounds.w += delta;
+            this._contentSize.width = width;
+        } 
+        if (this._contentSize.height != height) {
+            var delta = height - this._contentSize.height;
+            this.$ibounds.h += delta;
+            this._contentSize.height = height;
+        }
     },
     
     /**
@@ -1079,6 +1077,11 @@ cc.ui.Component = cc.Node.extend({
             var x2y2 = cc.Vertex2(x1y1.x + this.$ibounds.w + this.$padding.r, x1y2.y);
             var x2y1 = cc.Vertex2(x2y2.x, x1y1.y);
 
+            if (this._tag == "TestNode") {
+                var p = this.getPosition();
+                console.log("CCUIComponent, drawing testnode: [" + x1y1.x + "," + x1y1.y + "] [" + x1y2.x + "," + x1y2.y + "] [" + x2y2.x + "," + x2y2.y + "] [" + x2y1.x + "," + x2y1.y + "]");
+                console.log("CCUIComponent, at position: " + p.x + "," + p.y);
+            }
             cc.drawingUtil.drawPoly([ x1y1, x1y2, x2y2, x2y1 ], 4, false, true);
 
             /*
@@ -1132,7 +1135,7 @@ cc.ui.Component = cc.Node.extend({
      */
     draw : function(ctx) {        
         var context = ctx || cc.renderContext;
-        context.save();
+        //context.save();
 
         if (context != null && this._visible) {
             if (this.$hasBG) {
@@ -1165,10 +1168,10 @@ cc.ui.Component = cc.Node.extend({
             if (clipped) {
                 try  {
                     // TODO
-                    /*
-                    pushClip(this.$ibounds.x, this.$ibounds.y, 
-                             this.$ibounds.w, this.$ibounds.h);
-                    */
+                    
+                    //pushClip(this.$ibounds.x, this.$ibounds.y, 
+                    //         this.$ibounds.w, this.$ibounds.h);
+                    
                 } catch (err) { 
                     cc.ui.logE("cc.ui",
                                "Component.paint.pushClip error: " + err);
@@ -1198,12 +1201,7 @@ cc.ui.Component = cc.Node.extend({
             this.$isDirty = false;
         }
 
-        context.restore();
-
-        // TODO : understand better how the Node base classes will render
-        // and if this call should be at the beginning or end of the method
-        // Call up to the Node base class to render
-        //this._super(ctx);
+        //context.restore();
     },
 
     /**

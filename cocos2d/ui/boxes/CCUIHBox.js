@@ -105,12 +105,18 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
             var childSize = null;
             var prefSize = null;
 
+            var isComponent = false;
+
             cc.ui.logI("cc.ui.boxes", "HBox, child length is: " + children.length);
             for (var i = 0; i < children.length; i++) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
-                prefSize = children[i].getPreferredSize();
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+
+                prefSize = (isComponent) ? 
+                    children[i].getPreferredSize() : children[i].getContentSize();
+
                 // If the child has a preferred size set, we use it, otherwise
                 // we lay it out with the max space currently available to it
                 // and let it tell us back what size it wants to be
@@ -124,8 +130,12 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 cc.ui.logI("cc.ui.boxes", "HBox, child prefsize is: " + prefSize.width + ", " + prefSize.height);
 
                 // Layout the child and get its layout size
-                childSize = 
-                    children[i].doLayout(prefSize.width, prefSize.height);
+                if (isComponent) {
+                    childSize = 
+                        children[i].doLayout(prefSize.width, prefSize.height);
+                } else {
+                    childSize = prefSize;
+                }
 
                 cc.ui.logI("cc.ui.boxes", "HBox, childsize is: " + childSize.width + ", " + childSize.height);
                     
@@ -134,21 +144,24 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                                         this.$ibounds.y + maxHeight - childSize.height);
                                                         
                 cc.ui.logI("cc.ui.boxes", "HBox, child location set to: " + this.$ibounds.x + ", " + (this.$ibounds.y + maxHeight - childSize.height));
+                totalWidth += childSize.width;
 
                 if (childSize.height > totalHeight) {
                     totalHeight = childSize.height;
                 }
-                totalWidth += childSize.width;
 
                 if (totalWidth >= maxWidth) {
                     // We've run out of room, so abort early
                     break;
-                }                
+                }
             }
 
             // Set the box's content size and internal bounding box to
             // be the size returned from layout. This may change later in
             // the stretchAndAlign call
+            // NOTE: No need for 'else' statements here because the contentSize
+            // is set to equal the prefSize (when it is not -1) by the base
+            // class (Component) doLayout method.
             if (this.$prefSize.w == -1) {
                 this.$ibounds.w = totalWidth;            
                 this._contentSize.width += totalWidth;
@@ -158,7 +171,7 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 this._contentSize.height += totalHeight;        
             }
             
-            return { "width" : totalWidth, "height" : totalHeight };
+            return { "width" : this._contentSize.width, "height" : this._contentSize.height };
                                     
         } catch (err) {
             cc.ui.logE("cc.ui.boxes",
@@ -227,56 +240,78 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
             var ctrWidth = 0;
             
             var pos = null;
-            
+            var isComponent = false;
+            var stretch = null;
+
             // Move right to left and align children Horizontally.            
             // This loop first right-justifies components, then attempts
             // to horizontally place components as best it can
             for (var i = children.length - 1; i >= 0; i--) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+
                 size = children[i].getContentSize();
                 pos = children[i].getPosition();
-                align = children[i].getHorizAlign();
-                if (align == cc.ui.Constants.ALGN_RIGHT) {
-                    // Right Justified
-                    rightEdge -= size.width;
-                    if (rightEdge < pos.x) {
-                        // Never allow the component to be moved
-                        // further right than where it would normally be
-                        // (because that means there are other components 
-                        // taking up the space left of this one)
-                        rightEdge = pos.x;
-                    }
-                    children[i].setPositionX(rightEdge);
-                    
-                } else if (align == cc.ui.Constants.ALGN_CENTER) {
-                    // Keep track of the indexes of the first 'center' child and
-                    // the last 'center' child, as well as the overall width
-                    // of all children 'center' aligned
-                    if (i > ctrRight) {
-                        ctrRight = i;
-                    }
-                    ctrLeft = i;
-                    ctrWidth += size.width;
-                } else { 
-                    // Left is default
-                    x = pos.x + size.width;
-                    if (x > leftEdge) {
-                        // Keep track of the right of the 'left' aligned components
-                        leftEdge = x;
-                    }                   
+
+                // Default to LEFT alignment for legacy non-ui components
+                align = (isComponent) ? 
+                    children[i].getHorizAlign() : cc.ui.Constants.ALGN_LEFT;
+
+                switch (align) {
+                    case cc.ui.Constants.ALGN_RIGHT:
+                        // Right Justified
+                        rightEdge -= size.width;
+                        if (rightEdge < pos.x) {
+                            // Never allow the component to be moved
+                            // further right than where it would normally be
+                            // (because that means there are other components 
+                            // taking up the space left of this one)
+                            rightEdge = pos.x;
+                        }
+                        children[i].setPositionX(rightEdge);
+                        break;
+                    case cc.ui.Constants.ALGN_CENTER:
+                        // Keep track of the indexes of the first 'center' child and
+                        // the last 'center' child, as well as the overall width
+                        // of all children 'center' aligned
+                        if (i > ctrRight) {
+                            ctrRight = i;
+                        }
+                        ctrLeft = i;
+                        ctrWidth += size.width;
+                        break;
+                    case cc.ui.Constants.ALGN_LEFT:
+                    default:
+                        // Left is default
+                        x = pos.x + size.width;
+                        if (x > leftEdge) {
+                            // Keep track of the right of the 'left' aligned components
+                            leftEdge = x;
+                        }
+                        break;                
                 }
+
+                stretch = (isComponent) ?
+                    children[i].shouldStretch() : false;
 
                 // We stretch and align all child components to be the same
                 // height
-                if (children[i].shouldStretch()) {
+                if (stretch) {
                     children[i].stretchAndAlign(size.width, height);                        
                 } else {
-                    children[i].stretchAndAlign(size.width, size.height);                              
+                    if (isComponent) {
+                        children[i].stretchAndAlign(size.width, size.height);
+                    } else {
+                        children[i].setContentSize(size.width, size.height);
+                    }                    
                     // Align children vertically
                     if (size.height < height) {                               
-                        switch (children[i].getVertAlign()) {
+                        // Default to TOP for legacy non-ui components
+                        align = (isComponent) ?
+                            children[i].getVertAlign() : cc.ui.Constants.ALGN_TOP;                               
+                        switch (align) {
                             case cc.ui.Constants.ALGN_TOP:
                                 break;
                             case cc.ui.Constants.ALGN_MIDDLE:
@@ -299,21 +334,23 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
             if (ctrWidth > 0) {
                 var minX = leftEdge;
                 var maxX = rightEdge;
-                x = ctrPoint - Math.floor(ctrWidth / 2);
-                
-                if (x < minX) {
-                    // The centered components must be shifted right to fit
-                    x = minX;
-                } else if (x + ctrWidth > maxX) {
-                    // The centered components must be shifted left to fit
-                    x = maxX - ctrWidth;
+                var availWidth = rightEdge - leftEdge;
+                console.log("HBOX CENTERED, rightEdge: " + rightEdge + ", leftEdge: " + leftEdge);
+                console.log("HBOX CENTERED, available width: " + availWidth);
+                console.log("HBOX CENTERED, need width: " + ctrWidth);
+                if (availWidth > ctrWidth) {
+                    var space = Math.floor((availWidth - ctrWidth) / 2);
+                    x = leftEdge + space;
+                } else {
+                    x = leftEdge;
                 }
+                console.log("HBOX, ctrLeft: " + ctrLeft + ", ctrRight: " + ctrRight);
                 for (i = ctrLeft; i <= ctrRight; i++) {
-                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                    if (!children[i]) {
                         continue;
                     }
-                    size = children[i].getContentSize();
                     children[i].setPositionX(x);
+                    size = children[i].getContentSize();
                     x += size.width;
                 }
             }

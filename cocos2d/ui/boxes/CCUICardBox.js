@@ -253,6 +253,8 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             var height = 0;
             var size = null;
             
+            var isComponent = false;
+
             if (children.length == 0) {
                 this.$activeIndex = 0;
             } else if (this.$activeIndex >= children.length) {
@@ -260,13 +262,17 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             }
         
             for (var i = 0; i < children.length; i++) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+
                 // We'll set the default visibility as well
                 children[i].setVisible(i == this.$activeIndex);
                 
-                size = children[i].doLayout(maxWidth, maxHeight);
+                size = (isComponent) ? 
+                    children[i].doLayout(maxWidth, maxHeight)
+                    : children[i].getContentSize();
                 
                 if (size.width > width) {
                     width = size.width;
@@ -275,8 +281,23 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
                     height = size.height;
                 }
             }
-            // We size ourselves to be the dimensions of the largest card(s)
-            return { "width" : width, "height" : height };
+
+            // Set the box's content size and internal bounding box to
+            // be the size of the largest card(s). This may change later in
+            // the stretchAndAlign call
+            // NOTE: No need for 'else' statements here because the contentSize
+            // is set to equal the prefSize (when it is not -1) by the base
+            // class (Component) doLayout method.
+            if (this.$prefSize.w == -1) {
+                this.$ibounds.w = width;            
+                this._contentSize.width += width;
+            }
+            if (this.$prefSize.h == -1) {
+                this.$ibounds.h = height;
+                this._contentSize.height += height;        
+            }
+            
+            return { "width" : this._contentSize.width, "height" : this._contentSize.height };
             
         } catch (err) {
             cc.ui.logE("cc.ui.boxes",
@@ -325,18 +346,25 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             if (!children) {
                 return;
             }
+            var isComponent = false;
+            var align = null;
+            var stretch = false;
 
             for (var i = 0; i < children.length; i++) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                 // We'll give the child a default lower/left position, then
                 // adjust if necessary below
                 children[i].setPosition(this.$ibounds.x, 
                                         this.$ibounds.y);
 
-                if (children[i].shouldStretch()) {
+                stretch = (isComponent) ? children[i].shouldStretch()
+                    : false;
+
+                if (stretch) {
                     children[i].stretchAndAlign(width, height);
                 } else {
                     // Align the child within the available space per the
@@ -345,7 +373,10 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
                     size = children[i].getContentSize();
 
                     if (size.height < height) {
-                        switch (children[i].getVertAlign()) {
+                        align = (isComponent) ? children[i].getVertAlign()
+                            : cc.ui.Constants.ALGN_TOP;
+
+                        switch (align) {
                             case cc.ui.Constants.ALGN_BOTTOM:
                                 // Already done by default above ($ibounds.y)
                                 break;
@@ -363,7 +394,10 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
                     }
 
                     if (size.width < width) {
-                        switch (children[i].getHorizAlign()) {
+                        align = (isComponent) ? children[i].getHorizAlign()
+                            : cc.ui.Constants.ALGN_LEFT;
+
+                        switch (align) {
                             case cc.ui.Constants.ALGN_LEFT:
                                 // Already done by default above ($ibounds.x)
                                 break;

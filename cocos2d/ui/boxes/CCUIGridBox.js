@@ -196,6 +196,8 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
             var colMax = Math.floor(maxWidth / this.$cols);
             var rowMax = Math.floor(maxHeight / this.$rows);
 
+            var isComponent = false;
+
             // Case 0: both the row and col size are manually set
             // Casd 1: only the row size is manually set
             // Case 2: only the col size is manually set
@@ -209,10 +211,13 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                 var rH = (this.$rowHeight < rowMax) ? this.$rowHeight : rowMax;
 
                 for (var i = 0; i < children.length; i++) {
-                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                    if (!children[i]) {
                         continue;
                     }
-                    children[i].doLayout(cW, rH);
+                    isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+                    if (isComponent) {
+                        children[i].doLayout(cW, rH);
+                    }
                 }                
                 width = this.$cols * cW;
                 height = this.$rows * rH;
@@ -238,10 +243,14 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                 
                 var childSize = null;
                 for (var i = 0; i < children.length; i++) {
-                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                    if (!children[i]) {
                         continue;
                     }
-                    childSize = children[i].doLayout(colMax, rowMax);
+                    isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+
+                    childSize = 
+                        (isComponent) ? children[i].doLayout(colMax, rowMax) : 
+                            children[i].getContentSize();
                     if (childSize.width > cellWidth && childSize.width <= colMax) {
                         cellWidth = childSize.width;
                     }
@@ -267,6 +276,9 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
             // Set the box's content size and internal bounding box to
             // be the size returned from layout. This may change later in
             // the stretchAndAlign call
+            // NOTE: No need for 'else' statements here because the contentSize
+            // is set to equal the prefSize (when it is not -1) by the base
+            // class (Component) doLayout method.
             if (this.$prefSize.w == -1) {
                 this.$ibounds.w = width;            
                 this._contentSize.width += width;
@@ -276,7 +288,7 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                 this._contentSize.height += height;        
             }
             
-            return { "width" : width, "height" : height };
+            return { "width" : this._contentSize.width, "height" : this._contentSize.height };
                 
         } catch (err) {
             cc.ui.logE("cc.ui.boxes", 
@@ -340,6 +352,9 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
             var calcWidth = 0;
             var calcHeight = 0;
             var childSize = null;
+            var isComponent = false;
+            var stretch = false;
+            var align = null;
 
             for (var i = 0; i < this.$rows; i++) {
                 for (var j = 0; j < this.$cols; j++) {
@@ -349,28 +364,34 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                     if (index == children.length) {
                         break;
                     }
-                    if (!children[index] || !cc.ui.instanceOf(children[index], cc.ui.Component)) {
-                        index++;
+                    if (!children[index]) {
                         continue;
                     }
+                    isComponent = cc.ui.instanceOf(children[index], cc.ui.Component);
+                    
                     // These are calculated each time through the
                     // loop because they are adjusted each time for
                     // the cell's alignment values
                     loc.y = this.$ibounds.y + height - (i * this.$rowHeightC);
                     loc.x = (j * this.$colWidthC) + this.$ibounds.x;
+
+                    stretch = (isComponent) ?
+                        children[index].shouldStretch() : false;
                         
-                    if (children[index].shouldStretch()) {
+                    if (stretch) {
                         // If the child in the cell should stretch, then we
                         // stretch it to fill the cell entirely
                         children[index].stretchAndAlign(this.$colWidthC, this.$rowHeightC);
                         loc.y -= this.$rowHeightC;
                     } else {
                         // Otherwise, we let it complete it's layout using its
-                        // preferred size and then calculate where to align it
+                        // current size and then calculate where to align it
                         // within the space afforded the cell
                         childSize = children[index].getContentSize();
-                        children[index].stretchAndAlign(childSize.width,
-                                                        childSize.height);
+                        if (isComponent) {
+                            children[index].stretchAndAlign(childSize.width,
+                                                            childSize.height);
+                        }
                         loc.y -= childSize.height;
                         // Then calculate where to align the child within the
                         // cell
@@ -378,7 +399,11 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                         calcHeight = this.$rowHeightC - childSize.height;
                         
                         if (calcWidth > 0) {
-                            switch (children[index].getHorizAlign()) {
+                            // Default to LEFT alignment for legacy non-ui components
+                            align = (isComponent) ? 
+                                children[index].getHorizAlign() : cc.ui.Constants.ALGN_LEFT;
+
+                            switch (align) {
                                 case cc.ui.Constants.ALGN_LEFT:
                                     break;
                                 case cc.ui.Constants.ALGN_CENTER:
@@ -390,9 +415,13 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                             }
                         }
                         if (calcHeight > 0) {
-                            switch (children[index].getVertAlign()) {
+                            // Default to TOP for legacy non-ui components
+                            align = (isComponent) ?
+                                children[index].getVertAlign() : cc.ui.Constants.ALGN_TOP;                               
+
+                            switch (align) {
                                 case cc.ui.Constants.ALGN_TOP:
-                                    break;
+                                     break;
                                 case cc.ui.Constants.ALGN_MIDDLE:
                                     loc.y -= Math.floor(calcHeight / 2);
                                     break;

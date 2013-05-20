@@ -72,12 +72,18 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
 
             cc.ui.logI("cc.ui.boxes", "AbsoluteBox.doLayout max size is: " + maxWidth + ", " + maxHeight);
             var children = this._children;        
+
+            var isComponent = false;
         
             for (var i = 0; i < children.length; i++) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
-                prefSize = children[i].getPreferredSize();
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
+
+                prefSize = (isComponent) ? children[i].getPreferredSize()
+                    : children[i].getContentSize();
+
                 // The child should have a preferred size set and if it does
                 // we use it, otherwise we use the max size and it should 
                 // return it's desired size
@@ -88,7 +94,9 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
                     prefSize.height = totalHeight;
                 }
                 
-                children[i].doLayout(prefSize.width, prefSize.height);
+                if (isComponent) {
+                    children[i].doLayout(prefSize.width, prefSize.height);
+                }
 
                 // We skip any placement of the child and rely that setPosition
                 // has already been called
@@ -99,7 +107,19 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
             // preferred size set, or is stretchable and will do the right
             // thing based on how the developer is using it
 
-            return { "width" : maxWidth, "height" : maxHeight };
+            // NOTE: No need for 'else' statements here because the contentSize
+            // is set to equal the prefSize (when it is not -1) by the base
+            // class (Component) doLayout method.
+            if (this.$prefSize.w == -1) {
+                this.$ibounds.w = maxWidth;            
+                this._contentSize.width += maxWidth;
+            }
+            if (this.$prefSize.h == -1) {
+                this.$ibounds.h = maxHeight;
+                this._contentSize.height += maxHeight;        
+            }
+
+            return { "width" : this._contentSize.width, "height" : this._contentSize.height };
             
         } catch (err) {
             cc.ui.logE("cc.ui.boxes",
@@ -140,17 +160,21 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
             if (!children) {
                 return;
             }
+            var isComponent = false;
 
             var size = null;
             for (var i = 0; i < children.length; i++) {
-                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                if (!children[i]) {
                     continue;
                 }
+                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
-                // Set above in doLayout() using the Component's preferred size
-                size = children[i].getContentSize();
+                if (isComponent) {
+                    // Set above in doLayout() using the Component's preferred size
+                    size = children[i].getContentSize();
 
-                children[i].stretchAndAlign(size.width, size.height);
+                    children[i].stretchAndAlign(size.width, size.height);
+                }
             }
         } catch (err) {
             cc.ui.logE("cc.ui.boxes", 
