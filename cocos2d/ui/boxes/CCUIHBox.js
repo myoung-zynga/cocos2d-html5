@@ -95,7 +95,7 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 maxWidth -= (bw.left + bw.right);
                 maxHeight -= (bw.top + bw.bottom);
             }
-
+                                    
             cc.ui.logI("cc.ui.boxes", "HBox.doLayout max size is: " + maxWidth + ", " + maxHeight);
             var children = this._children;
             
@@ -105,17 +105,13 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
             var childSize = null;
             var prefSize = null;
 
-            var isComponent = false;
-
             cc.ui.logI("cc.ui.boxes", "HBox, child length is: " + children.length);
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
-                prefSize = (isComponent) ? 
-                    children[i].getPreferredSize() : children[i].getContentSize();
+                prefSize = children[i].getPreferredSize();
 
                 // If the child has a preferred size set, we use it, otherwise
                 // we lay it out with the max space currently available to it
@@ -130,12 +126,7 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 cc.ui.logI("cc.ui.boxes", "HBox, child prefsize is: " + prefSize.width + ", " + prefSize.height);
 
                 // Layout the child and get its layout size
-                if (isComponent) {
-                    childSize = 
-                        children[i].doLayout(prefSize.width, prefSize.height);
-                } else {
-                    childSize = prefSize;
-                }
+                childSize = children[i].doLayout(prefSize.width, prefSize.height);
 
                 cc.ui.logI("cc.ui.boxes", "HBox, childsize is: " + childSize.width + ", " + childSize.height);
                     
@@ -240,24 +231,20 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
             var ctrWidth = 0;
             
             var pos = null;
-            var isComponent = false;
-            var stretch = null;
-
+            
             // Move right to left and align children Horizontally.            
             // This loop first right-justifies components, then attempts
             // to horizontally place components as best it can
             for (var i = children.length - 1; i >= 0; i--) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                 size = children[i].getContentSize();
                 pos = children[i].getPosition();
 
                 // Default to LEFT alignment for legacy non-ui components
-                align = (isComponent) ? 
-                    children[i].getHorizAlign() : cc.ui.Constants.ALGN_LEFT;
+                align = children[i].getHorizAlign();
 
                 switch (align) {
                     case cc.ui.Constants.ALGN_RIGHT:
@@ -293,25 +280,15 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                         break;                
                 }
 
-                stretch = (isComponent) ?
-                    children[i].shouldStretch() : false;
-
                 // We stretch and align all child components to be the same
                 // height
-                if (stretch) {
+                if (children[i].shouldStretch()) {
                     children[i].stretchAndAlign(size.width, height);                        
                 } else {
-                    if (isComponent) {
-                        children[i].stretchAndAlign(size.width, size.height);
-                    } else {
-                        children[i].setContentSize(size.width, size.height);
-                    }                    
+                    children[i].stretchAndAlign(size.width, size.height);                    
                     // Align children vertically
-                    if (size.height < height) {                               
-                        // Default to TOP for legacy non-ui components
-                        align = (isComponent) ?
-                            children[i].getVertAlign() : cc.ui.Constants.ALGN_TOP;                               
-                        switch (align) {
+                    if (size.height < height) {                                                             
+                        switch (children[i].getVertAlign()) {
                             case cc.ui.Constants.ALGN_TOP:
                                 break;
                             case cc.ui.Constants.ALGN_MIDDLE:
@@ -346,7 +323,7 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 }
                 console.log("HBOX, ctrLeft: " + ctrLeft + ", ctrRight: " + ctrRight);
                 for (i = ctrLeft; i <= ctrRight; i++) {
-                    if (!children[i]) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
                     children[i].setPositionX(x);
