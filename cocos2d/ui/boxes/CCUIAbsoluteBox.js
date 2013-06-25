@@ -72,7 +72,7 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
 
             cc.ui.logI("cc.ui.boxes", "AbsoluteBox.doLayout max size is: " + maxWidth + ", " + maxHeight);
             var children = this._children;        
-
+//jing
             var isComponent = false;
         
             for (var i = 0; i < children.length; i++) {
