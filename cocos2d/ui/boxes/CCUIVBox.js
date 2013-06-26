@@ -137,7 +137,7 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
 
                 // Layout the child and get its layout size
                 if (isComponent) {
-                    childSize = 
+                    childSize =
                         children[i].doLayout(prefSize.width, prefSize.height);
                 } else {
                     childSize = prefSize;
