@@ -211,13 +211,11 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                 var rH = (this.$rowHeight < rowMax) ? this.$rowHeight : rowMax;
 
                 for (var i = 0; i < children.length; i++) {
-                    if (!children[i]) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
-                    isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
-                    if (isComponent) {
-                        children[i].doLayout(cW, rH);
-                    }
+                    children[i].doLayout(cW, rH);
+                    
                 }                
                 width = this.$cols * cW;
                 height = this.$rows * rH;
@@ -243,14 +241,10 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                 
                 var childSize = null;
                 for (var i = 0; i < children.length; i++) {
-                    if (!children[i]) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
-                    isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
-
-                    childSize = 
-                        (isComponent) ? children[i].doLayout(colMax, rowMax) : 
-                            children[i].getContentSize();
+                    childSize = children[i].doLayout(colMax, rowMax);
                     if (childSize.width > cellWidth && childSize.width <= colMax) {
                         cellWidth = childSize.width;
                     }
@@ -364,21 +358,18 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                     if (index == children.length) {
                         break;
                     }
-                    if (!children[index]) {
+                    if (!children[index] || !cc.ui.instanceOf(children[index], cc.ui.Component)) {
+                        index++;
                         continue;
                     }
-                    isComponent = cc.ui.instanceOf(children[index], cc.ui.Component);
                     
                     // These are calculated each time through the
                     // loop because they are adjusted each time for
                     // the cell's alignment values
                     loc.y = this.$ibounds.y + height - (i * this.$rowHeightC);
                     loc.x = (j * this.$colWidthC) + this.$ibounds.x;
-
-                    stretch = (isComponent) ?
-                        children[index].shouldStretch() : false;
                         
-                    if (stretch) {
+                    if (children[index].shouldStretch()) {
                         // If the child in the cell should stretch, then we
                         // stretch it to fill the cell entirely
                         children[index].stretchAndAlign(this.$colWidthC, this.$rowHeightC);
@@ -388,10 +379,8 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                         // current size and then calculate where to align it
                         // within the space afforded the cell
                         childSize = children[index].getContentSize();
-                        if (isComponent) {
-                            children[index].stretchAndAlign(childSize.width,
-                                                            childSize.height);
-                        }
+                        children[index].stretchAndAlign(childSize.width,
+                            childSize.height);
                         loc.y -= childSize.height;
                         // Then calculate where to align the child within the
                         // cell
@@ -399,11 +388,7 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                         calcHeight = this.$rowHeightC - childSize.height;
                         
                         if (calcWidth > 0) {
-                            // Default to LEFT alignment for legacy non-ui components
-                            align = (isComponent) ? 
-                                children[index].getHorizAlign() : cc.ui.Constants.ALGN_LEFT;
-
-                            switch (align) {
+                            switch (children[index].getHorizAlign()) {
                                 case cc.ui.Constants.ALGN_LEFT:
                                     break;
                                 case cc.ui.Constants.ALGN_CENTER:
