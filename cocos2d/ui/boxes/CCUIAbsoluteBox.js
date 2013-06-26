@@ -87,7 +87,7 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
                     prefSize.width = maxWidth;
                 }
                 if (prefSize.height == -1) {
-                    prefSize.height = totalHeight;
+                    prefSize.height = maxHeight; // Bug -- used to be totalHeight
                 }
                 
 

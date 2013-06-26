@@ -150,6 +150,7 @@
         'ui/boxes/CCUIBorderBox.js',
         'ui/boxes/CCUICardBox.js',
         'ui/boxes/CCUIAbsoluteBox.js',
+        'ui/boxes/CCUINodeBox.js',
         'ui/CCUIWindow.js'
     ];
 
