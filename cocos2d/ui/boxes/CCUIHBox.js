@@ -73,7 +73,7 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
      * subsequently to inform the Component of the final awarded size.</li>
      * </ul>
      * 
-     * @param maxWidth Maximum width available to the Component (in 
+     * @param maxWidth Maximum width available to the Component (in
      *                 pixels)
      * @param maxHeight Maximum height available to the Component (in 
      *                  pixels)
