@@ -133,12 +133,6 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
                 childSize = 
                     children[i].doLayout(prefSize.width, prefSize.height);
                 
-                totalHeight -= childSize.height;
-                if (totalHeight < 0) {
-                    // We've run out of room, so abort early
-                    break;
-                } 
-
                 cc.ui.logI("cc.ui", "VBox childsize is: " + childSize.width + ", " + childSize.height);
 
                 // Locate the child within the container
