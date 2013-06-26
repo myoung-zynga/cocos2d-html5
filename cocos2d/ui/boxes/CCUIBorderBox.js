@@ -461,7 +461,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                 }
                 
                 if (children[WEST].shouldStretch() && this.$westSize.height < availHeight)
--               {
+                {
                     this.$westSize.height = availHeight;
                 }
                     
