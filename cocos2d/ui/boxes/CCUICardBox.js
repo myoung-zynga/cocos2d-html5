@@ -236,6 +236,7 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
     doLayout : function(maxWidth, maxHeight) {
         try {
             this._super(maxWidth, maxHeight);
+            cc.ui.logI("miu");
 
             // Remove margins, padding and border from overall size dimensions
             maxWidth -= (this.$margin.l + this.$margin.r + this.$padding.l + this.$padding.r);
@@ -252,8 +253,6 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             var width = 0;
             var height = 0;
             var size = null;
-            
-            var isComponent = false;
 
             if (children.length == 0) {
                 this.$activeIndex = 0;
@@ -262,17 +261,14 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             }
         
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                 // We'll set the default visibility as well
                 children[i].setVisible(i == this.$activeIndex);
                 
-                size = (isComponent) ? 
-                    children[i].doLayout(maxWidth, maxHeight)
-                    : children[i].getContentSize();
+                size = children[i].doLayout(maxWidth, maxHeight);
                 
                 if (size.width > width) {
                     width = size.width;
@@ -329,6 +325,7 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
 
             cc.ui.logI("cc.ui.boxes", "CardBox.sAnda, old size: " + this._contentSize.width + ", " + this._contentSize.height);
             cc.ui.logI("cc.ui.boxes", "CardBox.sAnda, new size: " + width + ", " + height);
+            cc.ui.logI("lalalalalala");
 
             // Do any default re-sizing
             this._super(width, height);
@@ -346,25 +343,18 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
             if (!children) {
                 return;
             }
-            var isComponent = false;
-            var align = null;
-            var stretch = false;
 
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                 // We'll give the child a default lower/left position, then
                 // adjust if necessary below
                 children[i].setPosition(this.$ibounds.x, 
                                         this.$ibounds.y);
 
-                stretch = (isComponent) ? children[i].shouldStretch()
-                    : false;
-
-                if (stretch) {
+                if (children[i].shouldStretch()) {
                     children[i].stretchAndAlign(width, height);
                 } else {
                     // Align the child within the available space per the
@@ -373,10 +363,7 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
                     size = children[i].getContentSize();
 
                     if (size.height < height) {
-                        align = (isComponent) ? children[i].getVertAlign()
-                            : cc.ui.Constants.ALGN_TOP;
-
-                        switch (align) {
+                        switch (children[i].getVertAlign()) {
                             case cc.ui.Constants.ALGN_BOTTOM:
                                 // Already done by default above ($ibounds.y)
                                 break;
@@ -394,10 +381,7 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
                     }
 
                     if (size.width < width) {
-                        align = (isComponent) ? children[i].getHorizAlign()
-                            : cc.ui.Constants.ALGN_LEFT;
-
-                        switch (align) {
+                        switch (children[i].getHorizAlign()) {
                             case cc.ui.Constants.ALGN_LEFT:
                                 // Already done by default above ($ibounds.x)
                                 break;
