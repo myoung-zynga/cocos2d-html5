@@ -108,21 +108,15 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
             var childSize = null;
             var prefSize = null;
             
-            var isComponent = false;
             var tag = null;
 
             cc.ui.logI("cc.ui", "child length is: " + children.length);
-            for (var i = children.length - 1; i >= 0; i--) {
-                if (!children[i]) {
+            for (var i = 0; i < children.length; i++) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                tag = children[i].getTag();
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
-                console.log("VBox.dolayout: " + isComponent + ": " + tag);
-
-                prefSize = (isComponent) ? 
-                    children[i].getPreferredSize() : children[i].getContentSize();
-
+                prefSize = children[i].getPreferredSize();
+                
                 // If the child has a preferred size set, we use it, otherwise
                 // we lay it out with the max space currently available to it
                 // and let it tell us back what size it wants to be
@@ -136,12 +130,14 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
                 cc.ui.logI("cc.ui", "VBox child prefsize is: " + prefSize.width + ", " + prefSize.height);
 
                 // Layout the child and get its layout size
-                if (isComponent) {
-                    childSize = 
-                        children[i].doLayout(prefSize.width, prefSize.height);
-                } else {
-                    childSize = prefSize;
-                }
+                childSize = 
+                    children[i].doLayout(prefSize.width, prefSize.height);
+                
+                totalHeight -= childSize.height;
+                if (totalHeight < 0) {
+                    // We've run out of room, so abort early
+                    break;
+                } 
 
                 cc.ui.logI("cc.ui", "VBox childsize is: " + childSize.width + ", " + childSize.height);
 
@@ -251,23 +247,19 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
             var ctrHeight = 0;
             
             var pos = null;
-            var isComponent = false;
 
             // Move top to bottom and align children Vertically.            
             // This loop first top-justifies components, then attempts
             // to vertically place components as best it can
-            for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                 size = children[i].getContentSize();
                 pos = children[i].getPosition();
 
-                // Default to TOP alignment for legacy non-ui components
-                align = (isComponent) ? 
-                    children[i].getVertAlign() : cc.ui.Constants.ALGN_TOP;
+                align = children[i].getVertAlign();
 
                 switch (align) {
                     case cc.ui.Constants.ALGN_TOP:
@@ -297,25 +289,17 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
                         break;                  
                 }
 
-                var stretch = (isComponent) ?
-                    children[i].shouldStretch() : false;
-
                 // We stretch and align all (stretchable) child components to be 
                 // the width of the Box
-                if (stretch) {
+                if (children[i].shouldStretch()) {
                     children[i].stretchAndAlign(width, size.height);                        
                 } else {
-                    if (isComponent) {
-                        children[i].stretchAndAlign(size.width, size.height);                                
-                    } else {
-                        children[i].setContentSize(size.width, size.height);
-                    }                    
+                    children[i].stretchAndAlign(size.width, size.height);                    
                     // Align children horizontally
-                    if (size.width < width) { 
-                        // Default to LEFT for legacy non-ui components
-                        align = (isComponent) ?
-                            children[i].getHorizAlign() : cc.ui.Constants.ALGN_LEFT;                               
-                        switch (align) {
+                    if (size.width < width) {                                
+                        switch (children[i].getHorizAlign()) {
+                            case cc.ui.Constants.ALGN_LEFT:
+                                break;
                             case cc.ui.Constants.ALGN_CENTER:
                                 children[i].setPositionX( 
                                     this.$ibounds.x + 
@@ -352,7 +336,7 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
                 }
                 console.log("VBOX, ctrBottom: " + ctrBottom + ", ctrTop: " + ctrTop);
                 for (i = ctrBottom; i >= ctrTop; i--) {
-                    if (!children[i]) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
                     children[i].setPositionY(y);
