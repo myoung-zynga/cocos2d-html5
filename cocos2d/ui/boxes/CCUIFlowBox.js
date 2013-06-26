@@ -301,7 +301,7 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
                 // This loop first right-justifies components, then attempts
                 // to horizontally place components as best it can
                 for (var i = childIndex; i >= 0; i--) {
-                    if (!children[i] || cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
 
