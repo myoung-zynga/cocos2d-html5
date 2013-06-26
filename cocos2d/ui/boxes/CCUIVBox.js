@@ -89,7 +89,7 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
     doLayout : function(maxWidth, maxHeight) {
         try {
             this._super(maxWidth, maxHeight);
-
+            // comment
             // Remove margins, padding and border from overall size dimensions
             maxWidth -= (this.$margin.l + this.$margin.r + this.$padding.l + this.$padding.r);
             maxHeight -= (this.$margin.t + this.$margin.b + this.$padding.t + this.$padding.b);
