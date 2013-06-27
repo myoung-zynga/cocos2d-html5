@@ -25,22 +25,21 @@
 cc.ui.boxes = cc.ui.boxes || {};
 
 /**
- * The NodeBox class is a wrapper container for Legacy CC Nodes. It accepts a
+ * The NodeBox class is a wrapper container for Legacy CC Nodes. A Legacy
+ * CC Node is defined here as any non-Component node. NodeBox accepts a
  * single Legacy CC Node object and displays it based on its content size.
  * <br /><br />
  * Its methods provide the following functionality&#58;
  * <ul>
  * <li><i>To create a new instance of the NodeBox class</i>, use 
- * <a href="#NodeBox">NodeBox()</a>.</li>
- * <li><i>To return the dimensions of the bounding box that fits the child 
- * components of this NodeBox,</i> call <a href="#doLayout">doLayout()
+ * <a href="#NodeBox">NodeBox(legacyNode)</a>.</li>
+ * <li><i>To return the dimensions of the bounding box that fits the Legacy CC
+ * child node of this NodeBox,</i> call <a href="#doLayout">doLayout()
  * </a>.</li>
  * <li><i>To align the legacy node in this Component,</i> use 
  * <a href="#stretchAndAlign">stretchAndAlign()</a>.</li>
  * <li><i>To draw the contents of this Component to a given context,
  * </i> use <a href="#drawContent">drawContent()</a>.</li>
- * <li><i>To return the next Component for a particular traversal,</i> use 
- * <a href="#getNextComponent">getNextComponent()</a>.</li>
  * </ul>
  */
 cc.ui.boxes.NodeBox = cc.ui.Box.extend (
@@ -62,7 +61,7 @@ cc.ui.boxes.NodeBox = cc.ui.Box.extend (
         	
         	if (isComponent)
         	{
-        		cc.ui.logI("cc.ui.boxes", "NodeBox constructor received a non-legacy node");
+        		cc.ui.logW("cc.ui.boxes", "NodeBox constructor received a non-legacy node");
         	}
         	else
         	{
@@ -73,22 +72,10 @@ cc.ui.boxes.NodeBox = cc.ui.Box.extend (
 
     /**
      * The <a name="doLayout">doLayout()</a> method returns the total Width 
-     * and Height required by the child components of this Container, 
-     * at their preferred size (given current properties), with the given 
+     * and Height required by the child component of this Container, 
+     * based on the Content Size of the Legacy CC Node, with the given 
      * <i>MaxWidth</i> and <i>MaxHeight</i> (from the Container's 
-     * parent and the layout policy) as limits. 
-     * <br /><br />
-     * <b>NOTES&#58;</b>
-     * <ul>
-     * <li>If a preferred size has been set for the VBox, those dimensions 
-     * will be passed in as MaxWidth and MaxHeight.</li>
-     * <li>This method combines two essential steps in the layout subsystem,
-     * returning the desired size of the Component and setting the size of the 
-     * children. The layout subsystem expects every Component to assume its 
-     * desired size immediately in <i>doLayout().</i></li>
-     * <li>This Component's <i>stretchAndAlign()</i> method will be called 
-     * subsequently to inform the Component of the final awarded size.</li>
-     * </ul>
+     * parent and the layout policy) as limits.
      * 
      * @param maxWidth Maximum width available to the Component (in 
      *                 pixels)
