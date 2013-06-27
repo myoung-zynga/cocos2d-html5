@@ -236,7 +236,6 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
     doLayout : function(maxWidth, maxHeight) {
         try {
             this._super(maxWidth, maxHeight);
-            cc.ui.logI("miu");
 
             // Remove margins, padding and border from overall size dimensions
             maxWidth -= (this.$margin.l + this.$margin.r + this.$padding.l + this.$padding.r);
@@ -325,7 +324,6 @@ cc.ui.boxes.CardBox = cc.ui.Box.extend({
 
             cc.ui.logI("cc.ui.boxes", "CardBox.sAnda, old size: " + this._contentSize.width + ", " + this._contentSize.height);
             cc.ui.logI("cc.ui.boxes", "CardBox.sAnda, new size: " + width + ", " + height);
-            cc.ui.logI("lalalalalala");
 
             // Do any default re-sizing
             this._super(width, height);
