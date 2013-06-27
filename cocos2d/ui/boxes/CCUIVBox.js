@@ -111,7 +111,7 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
             var tag = null;
 
             cc.ui.logI("cc.ui", "child length is: " + children.length);
-            for (var i = 0; i < children.length; i++) {
+            for (var i = children.length - 1 ; i >= 0 ; i--) {
                 if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
@@ -245,7 +245,7 @@ cc.ui.boxes.VBox = cc.ui.Box.extend({
             // Move top to bottom and align children Vertically.            
             // This loop first top-justifies components, then attempts
             // to vertically place components as best it can
-            for (var i = children.length - 1; i >= 0; i--) {
+            for (var i = 0; i  < children.length ; i++) {
                 if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
