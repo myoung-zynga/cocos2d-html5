@@ -196,8 +196,6 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
             var colMax = Math.floor(maxWidth / this.$cols);
             var rowMax = Math.floor(maxHeight / this.$rows);
 
- //           var isComponent = false;
-
             // Case 0: both the row and col size are manually set
             // Casd 1: only the row size is manually set
             // Case 2: only the col size is manually set
@@ -346,7 +344,6 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
             var calcWidth = 0;
             var calcHeight = 0;
             var childSize = null;
- //           var isComponent = false;
             var stretch = false;
             var align = null;
 
@@ -359,7 +356,6 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                         break;
                     }
                     if (!children[index] || !cc.ui.instanceOf(children[index], cc.ui.Component)) {
-                        index++;
                         continue;
                     }
                     
@@ -400,7 +396,6 @@ cc.ui.boxes.GridBox = cc.ui.Box.extend({
                             }
                         }
                         if (calcHeight > 0) {
-                            // Default to TOP for legacy non-ui components
                             switch (children[index].getVertAlign()) {
                                 case cc.ui.Constants.ALGN_TOP:
                                      break;
