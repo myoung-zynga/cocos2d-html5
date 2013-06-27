@@ -243,7 +243,6 @@ cc.ui.boxes.HBox = cc.ui.Box.extend({
                 size = children[i].getContentSize();
                 pos = children[i].getPosition();
 
-                // Default to LEFT alignment for legacy non-ui components
                 align = children[i].getHorizAlign();
 
                 switch (align) {
