@@ -138,7 +138,7 @@ cc.ui.boxes.NodeBox = cc.ui.Box.extend (
 			
 			
 			tag = child.getTag();
-			console.log("NodeBox.dolayout: " + tag);
+			c.ui.logI("NodeBox.dolayout: " + tag);
 			
 			prefSize = child.getContentSize();
 
