@@ -61,6 +61,25 @@ cc.ui.Background = cc.Class.extend({
     draw : function(x, y, w, h, pressed, context)
     {
     	// Do stuff
+    	
+    	if (this.$hasImage)
+    	{
+    		drawImageBackground();
+    	}
+    	else
+    	{
+    		drawColorBackground();
+    	}
+    },
+    
+    drawColorBackground : function(x, y, w, h, pressed, context)
+    {
+    	
+    },
+    
+    drawImageBackground : function(x, y, w, h, pressed, context)
+    {
+    	
     },
 
 });
