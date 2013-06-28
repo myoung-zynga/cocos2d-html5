@@ -116,20 +116,16 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
             
             var rowX = 0;
             var rowY = 0;
-
-            var isComponent = false;
-            
+                        
             this.$rowHeights = new Array();
             
             cc.ui.logI("cc.ui.boxes", "FlowBox, child length is: " + children.length);
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
-                prefSize = (isComponent) ? children[i].getPreferredSize()
-                    : children[i].getContentSize();
+                prefSize = children[i].getPreferredSize();
 
                 // If the child has a preferred size set, we use it, otherwise
                 // we lay it out with the max space currently available to it
@@ -142,9 +138,7 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
                 }
                 
                 // Layout the child and get its preferred size
-                childSize = (isComponent) ? 
-                    children[i].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                childSize = children[i].doLayout(prefSize.width, prefSize.height);
 
                 if (childSize.width > availW) {
                     if (availW < maxWidth) {
@@ -285,8 +279,6 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
             var ctrWidth;
             
             var pos;
-            var isComponent = false;
-            var stretch;
 
             var childIndex = children.length - 1;
 
@@ -309,15 +301,13 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
                 // This loop first right-justifies components, then attempts
                 // to horizontally place components as best it can
                 for (var i = childIndex; i >= 0; i--) {
-                    if (!children[i]) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                         continue;
                     }
-                    isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
                     size = children[i].getContentSize();
                     pos = children[i].getPosition();
-                    align = (isComponent) ? children[i].getHorizAlign()
-                        : cc.ui.Constants.ALGN_LEFT; // default LEFT for legacy
+                    align = children[i].getHorizAlign();
 
                     if (topEdge == null) {
                         topEdge = pos.y + size.height;
@@ -360,23 +350,17 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
                         }                   
                     }
 
-                    stretch = (isComponent) ?
-                        children[i].shouldStretch() : false;
-
                     // We stretch and align all child components to be the same
                     // height                    
-                    if (stretch) {
+                    if (children[i].shouldStretch()) {
                         children[i].stretchAndAlign(size.width, height);                        
                     } else {
-                        if (isComponent) {
-                            children[i].stretchAndAlign(size.width, size.height);
-                        }
+                        children[i].stretchAndAlign(size.width, size.height);
+                        
                         // Align children vertically
-                        if (size.height < height) {                               
-                            align = (isComponent) ? children[i].getVertAlign()
-                                : cc.ui.Constants.ALGN_TOP; // default LEFT for legacy
-
-                            switch (align) {
+                        if (size.height < height) {
+                                       
+                            switch (children[i].getVertAlign()) {
                                 case cc.ui.Constants.ALGN_TOP:
                                     break;
                                 case cc.ui.Constants.ALGN_MIDDLE:
@@ -410,7 +394,7 @@ cc.ui.boxes.FlowBox = cc.ui.Box.extend({
                         x = maxX - ctrWidth;
                     }
                     for (i = ctrLeft; i <= ctrRight; i++) {
-                        if (!children[i]) {
+                        if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                             continue;
                         }
                         size = children[i].getContentSize();

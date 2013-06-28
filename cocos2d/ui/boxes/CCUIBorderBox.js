@@ -122,18 +122,13 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
     
             var availWidth = maxWidth;
             var availHeight = maxHeight;
-
-            var isComponent = false;
         
             // The preferred height of a BorderLayout is the preferred height 
             // of the northern component + the southern component + the 
             // center component
             this.$northSize = null;
             if (children[NORTH]) {
-                isComponent = cc.ui.instanceOf(children[NORTH], cc.ui.Component);
-                var prefSize = 
-                    (isComponent) ? children[NORTH].getPreferredSize()
-                    : children[NORTH].getContentSize();
+                var prefSize = children[NORTH].getPreferredSize();
 
                 if (prefSize.width == -1) {
                     prefSize.width = availWidth;
@@ -142,9 +137,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     prefSize.height = availHeight;
                 }
 
-                this.$northSize = (isComponent) ? 
-                    children[NORTH].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                this.$northSize = children[NORTH].doLayout(prefSize.width, prefSize.height);
             }
             if (this.$northSize) {
                 availHeight -= this.$northSize.height;
@@ -154,10 +147,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             }
             this.$southSize = null;
             if (children[SOUTH]) {
-                isComponent = cc.ui.instanceOf(children[SOUTH], cc.ui.Component);
-                var prefSize = 
-                    (isComponent) ? children[SOUTH].getPreferredSize()
-                    : children[SOUTH].getContentSize();
+                var prefSize = children[SOUTH].getPreferredSize();
 
                 if (prefSize.width == -1) {
                     prefSize.width = availWidth;
@@ -166,9 +156,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     prefSize.height = availHeight;
                 }
 
-                this.$southSize = (isComponent) ? 
-                    children[SOUTH].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                this.$southSize = children[SOUTH].doLayout(prefSize.width, prefSize.height);
             }
             if (this.$southSize) {
                 availHeight -= this.$southSize.height;
@@ -181,10 +169,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             // component
             this.$westSize = null;
             if (children[WEST]) {
-                isComponent = cc.ui.instanceOf(children[WEST], cc.ui.Component);
-                var prefSize = 
-                    (isComponent) ? children[WEST].getPreferredSize()
-                    : children[WEST].getContentSize();
+                var prefSize = children[WEST].getPreferredSize();
 
                 if (prefSize.width == -1) {
                     prefSize.width = availWidth;
@@ -193,9 +178,8 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     prefSize.height = availHeight;
                 }
 
-                this.$westSize = (isComponent) ?
-                    children[WEST].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                this.$westSize =
+                	children[WEST].doLayout(prefSize.width, prefSize.height);
             }
             if (this.$westSize) {
                 availWidth -= this.$westSize.width;
@@ -205,10 +189,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             }
             this.$eastSize = null;
             if (children[EAST]) {
-                isComponent = cc.ui.instanceOf(children[EAST], cc.ui.Component);
-                var prefSize = 
-                    (isComponent) ? children[EAST].getPreferredSize()
-                    : children[EAST].getContentSize();
+                var prefSize = children[EAST].getPreferredSize();
 
                 if (prefSize.width == -1) {
                     prefSize.width = availWidth;
@@ -217,9 +198,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     prefSize.height = availHeight;
                 }
 
-                this.$eastSize = (isComponent) ? 
-                    children[EAST].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                this.$eastSize = children[EAST].doLayout(prefSize.width, prefSize.height);
             }
             if (this.$eastSize) {
                 availWidth -= this.$eastSize.width;
@@ -230,10 +209,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             
             this.ctrSize = null;
             if (children[CENTER]) {
-                isComponent = cc.ui.instanceOf(children[CENTER], cc.ui.Component);
-                var prefSize = 
-                    (isComponent) ? children[CENTER].getPreferredSize()
-                    : children[CENTER].getContentSize();
+                var prefSize = children[CENTER].getPreferredSize();
 
                 if (prefSize.width == -1) {
                     prefSize.width = availWidth;
@@ -242,9 +218,7 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     prefSize.height = availHeight;
                 }
 
-                this.$ctrSize = (isComponent) ?
-                    children[CENTER].doLayout(prefSize.width, prefSize.height)
-                    : prefSize;
+                this.$ctrSize = children[CENTER].doLayout(prefSize.width, prefSize.height);
             }
             
             this.prefWidth = 0;
@@ -364,16 +338,9 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             var xOffset = 0;
             var yOffset = 0;
 
-            var isComponent = false;
-            var stretch = null;
-            var align = null;
-
             // First we fit the North component
             if (this.$northSize) {
-                isComponent = cc.ui.instanceOf(children[NORTH], cc.ui.Component);
-                stretch = (isComponent) ? children[NORTH].shouldStretch()
-                    : false;
-
+            
                 if (this.$northSize.width > availWidth) {
                     this.$northSize.width = availWidth;
                 }
@@ -383,20 +350,16 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                 
                 // If the Component stretches, we stretch it to be the 
                 // available width
-                if (stretch && this.$northSize.width < availWidth) {
+                if (children[NORTH].shouldStretch() && this.$northSize.width < availWidth) {
                     this.$northSize.width = availWidth;
                 }
                 
-                if (isComponent) {
-                    children[NORTH].stretchAndAlign(this.$northSize.width,
+                children[NORTH].stretchAndAlign(this.$northSize.width,
                                                     this.$northSize.height);
-                }
 
                 if (this.$northSize.width < availWidth) {
-                    align = (isComponent) ? children[NORTH].getHorizAlign()
-                        : cc.ui.Constants.ALGN_LEFT;
                     // We align the north component horizontally
-                    switch (align) {
+                    switch (children[NORTH].getHorizAlign()) {
                         case cc.ui.Constants.ALGN_LEFT:
                             xOffset = 0;
                             break;
@@ -432,9 +395,6 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             
             // Next we fit the South Component
             if (this.$southSize) {
-                isComponent = cc.ui.instanceOf(children[SOUTH], cc.ui.Component);
-                stretch = (isComponent) ? children[SOUTH].shouldStretch()
-                    : false;
     
                 if (this.$southSize.width > availWidth) {
                     this.$southSize.width = availWidth;
@@ -445,20 +405,18 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                 
                 // If the Component stretches, we stretch it to be the 
                 // available width
-                if (stretch && this.$southSize.width < availWidth) {
+                if (children[SOUTH].shouldStretch() && this.$southSize.width < availWidth) {
                     this.$southSize.width = availWidth;
                 }
                 
-                if (isComponent) {
-                    children[SOUTH].stretchAndAlign(this.$southSize.width,
-                                                    this.$southSize.height);
-                }
+                
+                children[SOUTH].stretchAndAlign(this.$southSize.width,
+                                                this.$southSize.height);
+                
 
                 if (this.$southSize.width < availWidth) {
-                    align = (isComponent) ? children[SOUTH].getHorizAlign()
-                        : cc.ui.Constants.ALGN_LEFT;
                     // We'll align the south component horizontally if possible
-                    switch (align) {
+                    switch (children[SOUTH].getHorizAlign()) {
                         case cc.ui.Constants.ALGN_LEFT:
                             xOffset = 0;
                             break;
@@ -494,9 +452,6 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
             
             // Next we fit the West component
             if (this.$westSize) {
-                isComponent = cc.ui.instanceOf(children[WEST], cc.ui.Component);
-                stretch = (isComponent) ? children[WEST].shouldStretch()
-                    : false;
                 
                 if (this.$westSize.width > availWidth) {
                     this.$westSize.width = availWidth;
@@ -505,20 +460,18 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     this.$westSize.height = availHeight;
                 }
                 
-                if (stretch && this.$westSize.height < availHeight) {
+                if (children[WEST].shouldStretch() && this.$westSize.height < availHeight)
+                {
                     this.$westSize.height = availHeight;
                 }
                     
-                if (isComponent) {
-                    children[WEST].stretchAndAlign(this.$westSize.width,
-                                                   this.$westSize.height);
-                }
+                
+                children[WEST].stretchAndAlign(this.$westSize.width,
+                                               this.$westSize.height);
 
-                if (this.$westSize.height < availHeight) {                                            
-                    align = (isComponent) ? children[WEST].getVertAlign()
-                        : cc.ui.Constants.ALGN_TOP;
+                if (this.$westSize.height < availHeight) { 
                     // We'll align the west component vertically if possible
-                    switch (align) {
+                    switch (children[WEST].getVertAlign()) {
                         case cc.ui.Constants.ALGN_TOP:
                             yOffset = 0;
                             break;
@@ -556,9 +509,6 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
     
             // Next we fit the East component
             if (this.$eastSize) {
-                isComponent = cc.ui.instanceOf(children[EAST], cc.ui.Component);
-                stretch = (isComponent) ? children[EAST].shouldStretch()
-                    : false;
                 
                 if (this.$eastSize.width > availWidth) {
                     this.$eastSize.width = availWidth;
@@ -567,21 +517,17 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     this.$eastSize.height = availHeight;
                 }
                 
-                if (stretch && this.$eastSize.height < availHeight) {
+                if (children[EAST].shouldStretch() && this.$eastSize.height < availHeight) {
                     // We stretch the Container to be the available height
                     this.$eastSize.height = availHeight;    
                 }
-                    
-                if (isComponent) {
-                    children[EAST].stretchAndAlign(this.$eastSize.width,
+                
+                children[EAST].stretchAndAlign(this.$eastSize.width,
                                                    this.$eastSize.height);
-                }
 
-                if (this.$eastSize.height < availHeight) {  
-                    align = (isComponent) ? children[EAST].getVertAlign()
-                        : cc.ui.Constants.ALGN_TOP;
+                if (this.$eastSize.height < availHeight) {
                     // We'll align the east component vertically if possible
-                    switch (align) {
+                    switch (children[EAST].getVertAlign()) {
                         case cc.ui.Constants.ALGN_TOP:
                             yOffset = 0;
                             break;
@@ -616,9 +562,6 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
     
             // Finally we fit the Center component        
             if (this.$ctrSize) {
-                isComponent = cc.ui.instanceOf(children[CENTER], cc.ui.Component);
-                stretch = (isComponent) ? children[CENTER].shouldStretch()
-                    : false;
     
                 if (this.$ctrSize.width > availWidth) {
                     this.$ctrSize.width = availWidth;
@@ -627,22 +570,19 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     this.$ctrSize.height = availHeight;
                 }
                 
-                if (stretch) {
+                if (children[CENTER].shouldStretch()) {
                     // We stretch the Container to be the available 
                     // width and height
                     this.$ctrSize.width = availWidth;
                     this.$ctrSize.height = availHeight;    
                 }
-                if (isComponent) {
-                    children[CENTER].stretchAndAlign(this.$ctrSize.width,
-                                                     this.$ctrSize.height);                
-                }
 
+                children[CENTER].stretchAndAlign(this.$ctrSize.width,
+                                                     this.$ctrSize.height);
+                                         
                 if (this.$ctrSize.width < availWidth) {
-                    align = (isComponent) ? children[CENTER].getHorizAlign()
-                        : cc.ui.Constants.ALGN_LEFT;
                     // We'll align the center component horizontally if possible
-                    switch (align) {
+                    switch (children[CENTER].getHorizAlign()) {
                         case cc.ui.Constants.ALGN_LEFT:
                             xOffset = 0;
                             break;
@@ -664,10 +604,8 @@ cc.ui.boxes.BorderBox = cc.ui.Box.extend({
                     }
                 }
                 if (this.$ctrSize.height < availHeight) {
-                    align = (isComponent) ? children[CENTER].getVertAlign()
-                        : cc.ui.Constants.ALGN_TOP;
                     // We'll align the center component vertically if possible
-                    switch (align) {
+                    switch (children[CENTER].getVertAlign()) {
                         case cc.ui.Constants.ALGN_TOP:
                             yOffset = 0;
                             break;
