@@ -69,12 +69,32 @@ cc.Label = cc.Node.extend(/** @lends cc.LabelTTFWebGL# */
         this._setColorStyleStr();
         this.setNodeDirty();
         },
+        /**
+        * Return color of sprite
+        * @return {cc.Color3B}
+        */
+        getColor:function () {
+           if (this._opacityModifyRGB)
+               return new cc.Color3B(this._colorUnmodified);
+    
+           return new cc.Color3B(this._color);
+        },
         
         setOpacity:function (opacity) {
-        if (this._opacity === opacity)
-        return;
-        this._super(opacity);
-        this._setColorStyleStr();
+           if (this._opacity === opacity)
+               return;
+           this._opacity = opacity;
+           this._setColorStyleStr();
+         },
+        //
+        // RGBA protocol
+        //
+        /**
+        * Return opacity of sprite
+        * @return {Number}
+        */
+        getOpacity:function () {
+        return this._opacity;
         },
         
         _setColorStyleStr:function () {
