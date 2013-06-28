@@ -67,7 +67,6 @@ cc.Label = cc.Node.extend(/** @lends cc.LabelTTFWebGL# */
         
         this._super(color3);
         this._setColorStyleStr();
-        this.setNodeDirty();
         },
         /**
         * Return color of sprite
@@ -158,6 +157,5 @@ cc.Label = cc.Node.extend(/** @lends cc.LabelTTFWebGL# */
         cc.Node.prototype.setPosition.call(this, pos, arguments[1]);
         else
         cc.Node.prototype.setPosition.call(this, pos);
-        this.SET_DIRTY_RECURSIVELY();
         }
     });
