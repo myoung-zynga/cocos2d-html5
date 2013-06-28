@@ -72,17 +72,13 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
 
             cc.ui.logI("cc.ui.boxes", "AbsoluteBox.doLayout max size is: " + maxWidth + ", " + maxHeight);
             var children = this._children;        
-
-            var isComponent = false;
         
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
-                prefSize = (isComponent) ? children[i].getPreferredSize()
-                    : children[i].getContentSize();
+                prefSize = children[i].getPreferredSize();
 
                 // The child should have a preferred size set and if it does
                 // we use it, otherwise we use the max size and it should 
@@ -91,12 +87,11 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
                     prefSize.width = maxWidth;
                 }
                 if (prefSize.height == -1) {
-                    prefSize.height = totalHeight;
+                    prefSize.height = maxHeight; // Bug -- used to be totalHeight
                 }
                 
-                if (isComponent) {
-                    children[i].doLayout(prefSize.width, prefSize.height);
-                }
+
+                children[i].doLayout(prefSize.width, prefSize.height);
 
                 // We skip any placement of the child and rely that setPosition
                 // has already been called
@@ -160,21 +155,18 @@ cc.ui.boxes.AbsoluteBox = cc.ui.Box.extend({
             if (!children) {
                 return;
             }
-            var isComponent = false;
 
             var size = null;
             for (var i = 0; i < children.length; i++) {
-                if (!children[i]) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
                     continue;
                 }
-                isComponent = cc.ui.instanceOf(children[i], cc.ui.Component);
 
-                if (isComponent) {
-                    // Set above in doLayout() using the Component's preferred size
-                    size = children[i].getContentSize();
+                
+                size = children[i].getContentSize();
+                children[i].stretchAndAlign(size.width, size.height);
 
-                    children[i].stretchAndAlign(size.width, size.height);
-                }
+                
             }
         } catch (err) {
             cc.ui.logE("cc.ui.boxes", 
