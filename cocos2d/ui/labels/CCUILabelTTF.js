@@ -262,6 +262,57 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         }
     },
 
+    /**
+     * renders the label
+     * @param {CanvasContext|Null} ctx
+     */
+    draw:function (ctx, renderType) {
+        var context = ctx || cc.renderContext;
+        if (this._flipX)
+            context.scale(-1, 1);
+        if (this._flipY)
+            context.scale(1, -1);
 
+        //this is fillText for canvas
+        context.fillStyle = this._colorStyleStr;
+
+        if (context.font != this._fontStyleStr)
+            context.font = this._fontStyleStr;
+
+        context.textBaseline = cc.LabelTTF._textBaseline[this._vAlignment];
+        context.textAlign = cc.LabelTTF._textAlign[this._hAlignment];
+        var xoffset = 0;
+        // contentSize set in CCNode.js
+        if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+            xoffset = this._contentSize.width;
+        else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER)
+            xoffset = this._contentSize.width / 2;
+        if (this._isMultiLine) {
+            var yOffset = 0;
+            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+                yOffset = this._fontSize + this._contentSize.height - this._fontSize * this._strings.length;
+            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+                yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
+
+            for (var i = 0; i < this._strings.length; i++) {
+                var line = this._strings[i];
+                context.fillText(line, xoffset, -this._contentSize.height + (this._fontSize * i) + yOffset);
+            }
+        } else {
+            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+                context.fillText(this._string, xoffset, 0);
+            else if(this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP)
+                context.fillText(this._string, xoffset, -this._contentSize.height);
+            else
+                context.fillText(this._string, xoffset, -this._contentSize.height/2);
+        }
+
+        // offsetPosition defined in Sprite, we'll have to implement this somewhere later
+        if (cc.SPRITE_DEBUG_DRAW === 1) {
+            context.fillStyle = "rgba(255,0,0,0.2)";
+            context.fillRect(this._offsetPosition.x, this._offsetPosition.y, this._contentSize.width, -this._contentSize.height);
+        }
+        cc.INCREMENT_GL_DRAWS(1);
+    }
 });
 s
