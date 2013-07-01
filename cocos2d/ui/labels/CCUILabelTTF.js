@@ -315,4 +315,3 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         cc.INCREMENT_GL_DRAWS(1);
     }
 });
-s
