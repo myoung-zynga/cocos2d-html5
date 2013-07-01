@@ -105,7 +105,8 @@ cc.ui.boxes.NodeBox = cc.ui.Box.extend (
             cc.ui.logI("cc.ui.boxes", "NodeBox.doLayout max size is: " + maxWidth + ", " + maxHeight);
             
             // Check to ensure there is no more than one child
-            if (!this._children || this._children.length > 1)
+            var maxChildren = this.$hasBG ? 2 : 1;
+            if (!this._children || this._children.length > maxChildren)
             {
             	// Something bad happened
             	cc.ui.logE("cc.ui.boxes", "NodeBox may only have one or no children");

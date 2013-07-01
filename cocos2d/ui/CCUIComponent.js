@@ -119,11 +119,11 @@ cc.ui.Component = cc.Node.extend({
     $border : null,
     $padding : null,
 
-    $colors : null,
-    $images : null,
-    $hasBG : false,
     $hasOverlay : false,
     $isDirty : true,
+    
+    $hasBG : false,
+    $background : null,
 
     $halign : cc.ui.Constants.ALGN_LEFT,
     $valign : cc.ui.Constants.ALGN_TOP,
@@ -142,10 +142,9 @@ cc.ui.Component = cc.Node.extend({
         this.$margin = { "t" : 0, "l" : 0, "b" : 0, "r" : 0 };
         this.$padding = { "t" : 0, "l" : 0, "b" : 0, "r" : 0 };
         
-        // Colors & Images
-        this.$colors = new Array();
-        this.$colors[cc.ui.Constants.COLOR_FG] = "0xff000000";
-        this.$images = new Array();
+        // Background
+        this.$background = new cc.ui.Background();
+        // this.addChild(this.$background);
 
         this.setAnchorPoint(0, 0);
     },
@@ -591,6 +590,16 @@ cc.ui.Component = cc.Node.extend({
             this.$ibounds.h += delta;
             this._contentSize.height = height;
         }
+        
+        // Update the background
+        if (this.$hasBG)
+        {
+        	this.$background.setContentSize(cc.size(this.$ibounds.w, this.$ibounds.h));
+        	this.$background.setPosition(this.$ibounds.x, this.$ibounds.y);
+        	
+        	// Ensure the background is behind everything
+        	this.reorderChild(this.$background, -1);
+        }
     },
     
     /**
@@ -771,7 +780,7 @@ cc.ui.Component = cc.Node.extend({
      *         cc.Color4B, or null if no value has been set.
      */ 
     getColor : function(colorType) {
-        return (this.$colors[colorType]) ? this.$colors[colorType] : null;
+        return this.$background.getColor(colorType);
     },
     
     /**
@@ -799,36 +808,13 @@ cc.ui.Component = cc.Node.extend({
      * @param color the cc.Color4B color value to use
      */ 
     setColor : function(colorType, color) {
-        if (colorType >= cc.ui.Constants.COLOR_BG &&
-            colorType <= cc.ui.Constants.COLOR_FG_SHD_HL) 
-        {
-            if (cc.ui.instanceOf(color, cc.Color4B)) {
-                this.$colors[colorType] = color;
-                if (colorType <= cc.ui.Constants.COLOR_BG_PRESSED) {
-                    if (color != null) {
-                        this.$hasBG = true;
-                    } else {
-                        if (this.$colors[cc.ui.Constants.COLOR_BG] != null
-                            || this.$colors[cc.ui.Constants.COLOR_BG_HL] != null
-                            || this.$colors[cc.ui.Constants.COLOR_BG_PRESSED] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG_HL] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG_PRESSED] != null ) 
-                        {
-                            this.$hasBG = true;
-                        } else {
-                            this.$hasBG = false;
-                        }
-                    }
-                }
-            } else {
-                cc.ui.logW("cc.ui.Component", 
-                           "Invalid param sent to setColor: " + color);
-            }
-        } else {
-            cc.ui.logW("cc.ui.Component",
-                       "Invalid param sent to setColor: " + colorType);
-        }
+    	this.$background.setColor(colorType, color);
+    	
+    	if (!this.$hasBG)
+    	{
+    		this.addChild(this.$background, 0);
+    		this.$hasBG = true;
+    	}
     },
 
     /**
@@ -1032,6 +1018,12 @@ cc.ui.Component = cc.Node.extend({
     },
 
     /**
+     * DEPRECATED 
+     * <br>
+     * This function is no longer used to draw the background -- instead,
+     * the class <a href="./cc.ui.Background.html">cc.ui.Background</a> 
+     * is utilized.
+     * <br> <br>
      * Paint the background of this Component. By default this method will
      * first look for the appropriate background image to draw. If no
      * background images have been set, the Component's appropriate
@@ -1042,6 +1034,7 @@ cc.ui.Component = cc.Node.extend({
      * @param context the context to draw the background of the Component to
      */
     drawBackground : function(context) {        
+        /*
         var bgImage = null;
         var bgColor = null;
         if (this.$ownsFocus) {
@@ -1092,8 +1085,9 @@ cc.ui.Component = cc.Node.extend({
                 this.ibounds.w + this.padding.l + this.padding.r, 
                 this.ibounds.h + this.padding.t + this.padding.b, 
                 bgColor); 
-            */  
+            * /  
         }
+        */
     },
     
     /**
@@ -1138,14 +1132,7 @@ cc.ui.Component = cc.Node.extend({
         //context.save();
 
         if (context != null && this._visible) {
-            if (this.$hasBG) {
-                try {
-                    this.drawBackground(context);
-                } catch (err) {
-                    cc.ui.logE("cc.ui", 
-                               "Component.paintBackground error: " + err);
-                }
-            }
+        	this.$background.setFocusAndPressed(this.$ownsFocus, this.$pressed);
             
             try {
                 if (this.$border != null) {
