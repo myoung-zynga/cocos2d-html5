@@ -32,6 +32,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _isMultiLine: false,
     _fontStyleStr: null,
     _colorStyleStr: null,
+    _fontClientHeight:0,
     /**
      * Constructor
      */
@@ -211,7 +212,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         if (dim.width != this._dimensions.width || dim.height != this._dimensions.height) {
             this._dimensions = dim;
 
-            // Force udpate
+            // Force update
             if (this._string.length > 0) this._updateTTF();
         }
     },
