@@ -594,8 +594,14 @@ cc.ui.Component = cc.Node.extend({
         // Update the background
         if (this.$hasBG)
         {
-        	this.$background.setContentSize(cc.size(this.$ibounds.w, this.$ibounds.h));
-        	this.$background.setPosition(this.$ibounds.x, this.$ibounds.y);
+        	var bgwidth = this.$ibounds.w + (this.$padding.l + this.$padding.r);
+        	var bgheight = this.$ibounds.h + (this.$padding.t + this.$padding.b);
+        	this.$background.setContentSize(cc.size(bgwidth, bgheight));
+        	
+        	var bgx = this.$ibounds.x - this.$padding.l;
+        	var bgy = this.$ibounds.y - this.$padding.b;
+        	
+        	this.$background.setPosition(bgx, bgy);
         	
         	// Ensure the background is behind everything
         	this.reorderChild(this.$background, -1);
