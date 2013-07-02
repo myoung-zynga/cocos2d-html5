@@ -318,8 +318,16 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 cc.ui.LabelTTF._textAlign = ["left", "center", "right"];
 cc.ui.LabelTTF._textBaseline = ["top", "middle", "bottom"];
+cc.ui.LabelTTF.__labelHeightDiv = document.createElement("div");
+cc.ui.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
+cc.ui.LabelTTF.__labelHeightDiv.innerHTML = "ajghl~!";
+cc.ui.LabelTTF.__labelHeightDiv.style.position = "absolute";
+cc.ui.LabelTTF.__labelHeightDiv.style.left = "-100px";
+cc.ui.LabelTTF.__labelHeightDiv.style.top = "-100px";
+document.body.appendChild(cc.ui.LabelTTF.__labelHeightDiv);
+
 cc.ui.LabelTTF.__getFontHeightByDiv = function(fontName, fontSize){
-    var labelDiv = cc.LabelTTF.__labelHeightDiv;
+    var labelDiv = cc.ui.LabelTTF.__labelHeightDiv;
     labelDiv.style.fontFamily = fontName;
     labelDiv.style.fontSize = fontSize + "px";
     return labelDiv.clientHeight ;
