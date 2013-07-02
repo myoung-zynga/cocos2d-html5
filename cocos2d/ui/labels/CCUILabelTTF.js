@@ -36,7 +36,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     /**
      * Constructor
      */
-    ctor: function () {
+    ctor: function (title, fontStyleStr, fontSize) {
         this._super();
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
@@ -315,4 +315,4 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         cc.INCREMENT_GL_DRAWS(1);
     }
 });
-s
+
