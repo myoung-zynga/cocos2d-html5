@@ -32,6 +32,7 @@ cc.ui.Background = cc.Node.extend(
 	$pressed : false,
 	$colors : null,
     $images : null,
+    $spriteBackground : null,
 	
 	/**
 	 * Creates the Background. Sets up the arrays to hold the 
@@ -79,11 +80,14 @@ cc.ui.Background = cc.Node.extend(
     	{
     		try
     		{
-				if (this.$images != null)
+				if (this.$images[cc.ui.Constants.IMAGE_BG] != null )
+                {
 				    this.drawImageBackground(x, y, w, h, context);
-			
+				}
 				else
+				{
 				    this.drawColorBackground(x, y, w, h, context);
+				}
     		}
     		catch (err)
     		{
@@ -135,22 +139,27 @@ cc.ui.Background = cc.Node.extend(
         return (this.$colors[colorType]) ? this.$colors[colorType] : null;
     },
 
-    getImage : function(imageType) {
+    getImage : function(imageType) 
+    {
         return (this.$images[imageType]) ? this.$images[imageType] : null;
     },
 
-    setImage : function(imageType, image, pieces, ext) {
+    setImage : function(imageType, image, pieces, ext) 
+    {
         if (imageType >= cc.ui.Constants.IMAGE_BG &&
                 imageType <= cc.ui.Constants.IMAGE_FG_PRESSED) 
         {                
- //           var img = null; 
-            this.$images[imageType] = image;
-            // TODO cc.ui.Utilities.loadImage(image, pieces, ext);
+            this.$images[imageType] = this.loadImage(imageType, image);
+            this.$spriteBackground = cc.Sprite.create(image);
             
-            if (imageType <= cc.ui.Constants.IMAGE_BG_PRESSED) {
-                if (image != null) {
+            if (imageType <= cc.ui.Constants.IMAGE_BG_PRESSED) 
+            {
+                if (image != null) 
+                {
                     this.$hasBackground = true;
-                } else {
+                } 
+                else 
+                {
                     if (this._colors[cc.ui.Constants.COLOR_BG] != null
                             || this.$colors[cc.ui.Constants.COLOR_BG_HL] != null
                             || this.$colors[cc.ui.Constants.COLOR_BG_PRESSED] != null
@@ -158,11 +167,39 @@ cc.ui.Background = cc.Node.extend(
                             || this.$images[cc.ui.Constants.IMAGE_BG_HL] != null
                             || this.$images[cc.ui.Constants.IMAGE_BG_PRESSED] != null ) {
                         this.$hasBackground = true;
-                    } else {
+                    } 
+                    else 
+                    {
                         this.$hasBackground = false;
                     }
                 }
             }            
+        }
+    },
+    
+    loadImage : function (type, filename)
+    {
+    	var texture = cc.TextureCache.getInstance().textureForKey(cc.FileUtils.getInstance().fullPathForFilename(filename));
+    	var that = this;
+        if (!texture)
+        {
+            this._visible = false;
+            var loadImg = new Image();
+            loadImg.addEventListener("load", function () 
+            {
+                cc.TextureCache.getInstance().cacheImage(filename, loadImg);
+                that.setImage(type, filename);
+            });
+            loadImg.addEventListener("error", function () 
+            {
+                cc.log("load failure:" + filename);
+            });
+            loadImg.src = filename;
+            return true;
+        } 
+        else 
+        {
+            return texture;
         }
     },
 
@@ -294,24 +331,54 @@ cc.ui.Background = cc.Node.extend(
         var context = ctx || cc.renderContext;
 
         var bgImage = null;
-        if (this.$ownsFocus) {
+        if (this.$ownsFocus) 
+        {
             bgImage = this.$images[cc.ui.Constants.IMAGE_BG_HL];
-            if (bgImage == null) {
+            if (bgImage == null) 
+            {
                 bgImage = this.$images[cc.ui.Constants.IMAGE_BG];
             }
         } 
-        else {
+        else 
+        {
             bgImage = this.$images[cc.ui.Constants.IMAGE_BG];
         }
-        if (this.$images[cc.ui.Constants.IMAGE_BG_PRESSED]) {
+        
+        if (this.$images[cc.ui.Constants.IMAGE_BG_PRESSED]) 
+        {
             bgImage = this.$images[cc.ui.Constants.IMAGE_BG_PRESSED];
         }
-        if (bgImage != null) {
-            var sprite = cc.Sprite.create(bgImage);
-            sprite.setPosition(cc.p(x, y));
-            sprite.setContentSize(cc.size(w, h));
-            sprite.draw(context);
+        
+        if (bgImage != null) 
+        {
+            // var sprite = cc.Sprite.create(bgImage);
+            // sprite.setPosition(x, y);
+            // sprite.setContentSize(cc.size(w, h));
+            // sprite.draw(context);
+            this.$spriteBackground._rect.origin = cc.p(x, y);
+            var sw = this.$spriteBackground._contentSize.width;
+            var sh = this.$spriteBackground._contentSize.height;
+            if (sw > w)
+            {
+            	sw = w;
+            }
+            if (sh > h)
+            {
+            	sh = h;
+            }
+            this.$spriteBackground._rect.size = cc.size(sw, sh);
+            this.$spriteBackground.draw(context);
+            
+            /* TODO use context.draw instead of the spriteBackground
+            context.drawImage(bgImage,
+                    this._position.x, this._position.y,
+                    this._contentSize.w, this._position.h,
+                    0, 0,
+                    this._contentSize.w, this._contentSize.h);
+            */
         }	
     },
+    
+    
 });
 
