@@ -59,7 +59,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      * @return {String}
      */
     description: function () {
-        return "<cc.LabelTTF | FontName =" + this._fontName + " FontSize = " + this._fontSize.toFixed(1) + ">";
+        return "<cc.ui.LabelTTF | FontName =" + this._fontName + " FontSize = " + this._fontSize.toFixed(1) + ">";
     },
 
     setColor: function (color3) {
@@ -137,7 +137,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
     /**
      * changes the string to render
-     * @warning Changing the string is as expensive as creating a new cc.LabelTTF. To obtain better performance use cc.LabelAtlas
+     * @warning Changing the string is as expensive as creating a new cc.ui.LabelTTF. To obtain better performance use cc.LabelAtlas
      * @param {String} text text for the label
      */
     setString: function (text) {
@@ -153,7 +153,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * return Horizontal Alignment of cc.LabelTTF
+     * return Horizontal Alignment of cc.ui.LabelTTF
      * @return {cc.TEXT_ALIGNMENT_LEFT|cc.TEXT_ALIGNMENT_CENTER|cc.TEXT_ALIGNMENT_RIGHT}
      */
     getHorizontalAlignment: function () {
@@ -162,7 +162,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * set Horizontal Alignment of cc.LabelTTF
+     * set Horizontal Alignment of cc.ui.LabelTTF
      * @param {cc.TEXT_ALIGNMENT_LEFT|cc.TEXT_ALIGNMENT_CENTER|cc.TEXT_ALIGNMENT_RIGHT} alignment Horizontal Alignment
      */
     setHorizontalAlignment: function (alignment) {
@@ -175,7 +175,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return Vertical Alignment of cc.LabelTTF
+     * return Vertical Alignment of cc.ui.LabelTTF
      * @return {cc.VERTICAL_TEXT_ALIGNMENT_TOP|cc.VERTICAL_TEXT_ALIGNMENT_CENTER|cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM}
      */
     getVerticalAlignment: function () {
@@ -183,7 +183,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * set Vertical Alignment of cc.LabelTTF
+     * set Vertical Alignment of cc.ui.LabelTTF
      * @param {cc.VERTICAL_TEXT_ALIGNMENT_TOP|cc.VERTICAL_TEXT_ALIGNMENT_CENTER|cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM} verticalAlignment
      */
     setVerticalAlignment: function (verticalAlignment) {
@@ -196,7 +196,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return Dimensions of cc.LabelTTF
+     * return Dimensions of cc.ui.LabelTTF
      * @return {cc.Size}
      */
     getDimensions: function () {
@@ -205,7 +205,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * set Dimensions of cc.LabelTTF
+     * set Dimensions of cc.ui.LabelTTF
      * @param {cc.Size} dim
      */
     setDimensions: function (dim) {
@@ -218,7 +218,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return font size of cc.LabelTTF
+     * return font size of cc.ui.LabelTTF
      * @return {Number}
      */
     getFontSize: function () {
@@ -241,7 +241,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * return font name of cc.LabelTTF
+     * return font name of cc.ui.LabelTTF
      * @return {String}
      */
     getFontName: function () {
@@ -249,14 +249,14 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * set font name of cc.LabelTTF
+     * set font name of cc.ui.LabelTTF
      * @param {String} fontName
      */
     setFontName: function (fontName) {
         if (this._fontName != fontName) {
             this._fontName = new String(fontName);
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
-            this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
+            this._fontClientHeight = cc.ui.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
         }
@@ -279,8 +279,8 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         if (context.font != this._fontStyleStr)
             context.font = this._fontStyleStr;
 
-        context.textBaseline = cc.LabelTTF._textBaseline[this._vAlignment];
-        context.textAlign = cc.LabelTTF._textAlign[this._hAlignment];
+        context.textBaseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
+        context.textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
         var xoffset = 0;
         // contentSize set in CCNode.js
         if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
@@ -318,3 +318,9 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 cc.ui.LabelTTF._textAlign = ["left", "center", "right"];
 cc.ui.LabelTTF._textBaseline = ["top", "middle", "bottom"];
+cc.ui.LabelTTF.__getFontHeightByDiv = function(fontName, fontSize){
+    var labelDiv = cc.LabelTTF.__labelHeightDiv;
+    labelDiv.style.fontFamily = fontName;
+    labelDiv.style.fontSize = fontSize + "px";
+    return labelDiv.clientHeight ;
+};
