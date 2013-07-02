@@ -835,7 +835,7 @@ cc.ui.Component = cc.Node.extend({
      *         if no value has been set.
      */ 
     getImage : function(imageType) {
-        return (this.$images[imageType]) ? this.$images[imageType] : null;
+        return this.$background.getImage(imageType);
     },
     
     /**
@@ -863,29 +863,12 @@ cc.ui.Component = cc.Node.extend({
      * @param ext the optional file extension of the image (".png" by default).
      */ 
     setImage : function(imageType, image, pieces, ext) {
-        if (imageType >= cc.ui.Constants.IMAGE_BG &&
-                imageType <= cc.ui.Constants.IMAGE_FG_PRESSED) 
-        {                
-            var img = null; 
-            this.$images[imageType] = img;
-            // TODO cc.ui.Utilities.loadImage(image, pieces, ext);
-            
-            if (imageType <= cc.ui.Constants.IMAGE_BG_PRESSED) {
-                if (image != null) {
-                    this.$hasBG = true;
-                } else {
-                    if (this._colors[cc.ui.Constants.COLOR_BG] != null
-                            || this.$colors[cc.ui.Constants.COLOR_BG_HL] != null
-                            || this.$colors[cc.ui.Constants.COLOR_BG_PRESSED] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG_HL] != null
-                            || this.$images[cc.ui.Constants.IMAGE_BG_PRESSED] != null ) {
-                        this.$hasBG = true;
-                    } else {
-                        this.$hasBG = false;
-                    }
-                }
-            }            
+        this.$background.setImage(imageType, image, pieces, ext);
+        
+        if (!this.$hasBG)
+        {
+            this.addChild(this.$background, 0);
+            this.$hasBG = true;
         }
     },
 
