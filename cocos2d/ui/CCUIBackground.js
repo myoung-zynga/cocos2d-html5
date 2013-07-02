@@ -139,11 +139,49 @@ cc.ui.Background = cc.Node.extend(
         return (this.$colors[colorType]) ? this.$colors[colorType] : null;
     },
 
+	/**
+     * Get the image value of this Component for the given image type, 
+     * if one was set. If no image has been set for a given image type, 
+     * this method will return null.
+     * 
+     * Acceptable values for the image type parameter are defined in the
+     * cc.ui.Constants class and include: 
+     * <ul>
+     * <li>IMAGE_BG</li>
+     * <li>IMAGE_BG_HL</li>
+     * </ul>
+     *
+     * @param imageType the constant image identifier as defined in
+     *                  cc.ui.Constants.
+     * @return the image of this Component for the given image type, or null
+     *         if no value has been set.
+     */ 
     getImage : function(imageType) 
     {
         return (this.$images[imageType]) ? this.$images[imageType] : null;
     },
 
+	/**
+     * Set the image value of this Component for the given image type. 
+     * 
+     * Acceptable values for the image type parameter are defined in the
+     * cc.ui.Constants class and include: 
+     * <ul>
+     * <li>IMAGE_BG</li>
+     * <li>IMAGE_BG_HL</li>
+     * </ul>
+     *
+     * Currently, the pieces and extension parameters are not used.
+     * 
+     * @param imageType the constant image identifier as defined in
+     *                  cc.ui.Constants.
+     * @param image a string of an image file on disk
+     * @param pieces this parameter is the number of pieces comprising the
+     *               image, for example for 3 or 9 piece background images.
+     *               This parameter is only used when the image parameter is
+     *               a string and the image must be loaded from disk.
+     * @param ext the optional file extension of the image (".png" by default).
+     */ 
     setImage : function(imageType, image, pieces, ext) 
     {
         if (imageType >= cc.ui.Constants.IMAGE_BG &&
@@ -177,6 +215,19 @@ cc.ui.Background = cc.Node.extend(
         }
     },
     
+    /**
+     * Checks if an image needs to be loaded, and if so performs the operation
+     * to load the image passed in.
+     * 
+     * @param type This is passed on from setImage, and is the constant defined
+     * 				in cc.ui.Constants where the image should be placed after
+     *				it has finished loading
+     * @param filename The file name of the image (with extension) that is to
+     *					be loaded in
+     * 
+     * @return The texture object, if there is one already loaded for the given
+     * 			filename. Otherwise, returns null.
+     */ 
     loadImage : function (type, filename)
     {
     	var texture = cc.TextureCache.getInstance().textureForKey(cc.FileUtils.getInstance().fullPathForFilename(filename));
@@ -195,7 +246,7 @@ cc.ui.Background = cc.Node.extend(
                 cc.log("load failure:" + filename);
             });
             loadImg.src = filename;
-            return true;
+            return null;
         } 
         else 
         {
@@ -326,6 +377,19 @@ cc.ui.Background = cc.Node.extend(
         }
     },
     
+    /**
+     * Called by draw, this method draws the background 
+     * as an image based on the current state of the
+     * component which owns this Background. Currently, the
+     * background is drawn using a sprite, and does not 
+     * support tiling.
+     * 
+     * @param x The x-coordinate to start the background from
+     * @param y The y-coordinate to start the background from
+     * @param w The width to draw the background with
+     * @param h The height to draw the background with
+     * @param ctx The screen to draw on
+     */
     drawImageBackground : function(x, y, w, h, ctx)
     {
         var context = ctx || cc.renderContext;
@@ -351,13 +415,12 @@ cc.ui.Background = cc.Node.extend(
         
         if (bgImage != null) 
         {
-            // var sprite = cc.Sprite.create(bgImage);
-            // sprite.setPosition(x, y);
-            // sprite.setContentSize(cc.size(w, h));
-            // sprite.draw(context);
+        	// Setup the sprite background to fit inside the background's rect
             this.$spriteBackground._rect.origin = cc.p(x, y);
             var sw = this.$spriteBackground._contentSize.width;
             var sh = this.$spriteBackground._contentSize.height;
+            
+            // Only constrain the image if it is smaller than the space given
             if (sw > w)
             {
             	sw = w;
@@ -366,7 +429,10 @@ cc.ui.Background = cc.Node.extend(
             {
             	sh = h;
             }
+            
             this.$spriteBackground._rect.size = cc.size(sw, sh);
+            
+            // Draw the sprite to the screen directly
             this.$spriteBackground.draw(context);
             
             /* TODO use context.draw instead of the spriteBackground
