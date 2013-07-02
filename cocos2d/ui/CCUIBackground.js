@@ -31,6 +31,7 @@ cc.ui.Background = cc.Node.extend(
 	$ownsFocus : false,
 	$pressed : false,
 	$colors : null,
+    $images : null,
 	
 	/**
 	 * Creates the Background. Sets up the arrays to hold the 
@@ -43,6 +44,7 @@ cc.ui.Background = cc.Node.extend(
     	// Setup colors
         this.$colors = new Array();
         this.$colors[cc.ui.Constants.COLOR_FG] = "0xff000000";
+        this.$images = new Array();
     },
     
     /**
@@ -77,11 +79,11 @@ cc.ui.Background = cc.Node.extend(
     	{
     		try
     		{
-				// if (image != null)
-				// drawImageBackground(x, y, w, h, context);
+				if (this.$images != null)
+				    this.drawImageBackground(x, y, w, h, context);
 			
-				// else
-				this.drawColorBackground(x, y, w, h, context);
+				else
+				    this.drawColorBackground(x, y, w, h, context);
     		}
     		catch (err)
     		{
@@ -132,7 +134,38 @@ cc.ui.Background = cc.Node.extend(
     {
         return (this.$colors[colorType]) ? this.$colors[colorType] : null;
     },
-    
+
+    getImage : function(imageType) {
+        return (this.$images[imageType]) ? this.$images[imageType] : null;
+    },
+
+    setImage : function(imageType, image, pieces, ext) {
+        if (imageType >= cc.ui.Constants.IMAGE_BG &&
+                imageType <= cc.ui.Constants.IMAGE_FG_PRESSED) 
+        {                
+ //           var img = null; 
+            this.$images[imageType] = image;
+            // TODO cc.ui.Utilities.loadImage(image, pieces, ext);
+            
+            if (imageType <= cc.ui.Constants.IMAGE_BG_PRESSED) {
+                if (image != null) {
+                    this.$hasBackground = true;
+                } else {
+                    if (this._colors[cc.ui.Constants.COLOR_BG] != null
+                            || this.$colors[cc.ui.Constants.COLOR_BG_HL] != null
+                            || this.$colors[cc.ui.Constants.COLOR_BG_PRESSED] != null
+                            || this.$images[cc.ui.Constants.IMAGE_BG] != null
+                            || this.$images[cc.ui.Constants.IMAGE_BG_HL] != null
+                            || this.$images[cc.ui.Constants.IMAGE_BG_PRESSED] != null ) {
+                        this.$hasBackground = true;
+                    } else {
+                        this.$hasBackground = false;
+                    }
+                }
+            }            
+        }
+    },
+
     /**
      * Set the color value of this Component for the given color type. 
      * Color values are described by their hexadecimal ARGB string 
@@ -258,7 +291,27 @@ cc.ui.Background = cc.Node.extend(
     
     drawImageBackground : function(x, y, w, h, ctx)
     {
+        var context = ctx || cc.renderContext;
 
+        var bgImage = null;
+        if (this.$ownsFocus) {
+            bgImage = this.$images[cc.ui.Constants.IMAGE_BG_HL];
+            if (bgImage == null) {
+                bgImage = this.$images[cc.ui.Constants.IMAGE_BG];
+            }
+        } 
+        else {
+            bgImage = this.$images[cc.ui.Constants.IMAGE_BG];
+        }
+        if (this.$images[cc.ui.Constants.IMAGE_BG_PRESSED]) {
+            bgImage = this.$images[cc.ui.Constants.IMAGE_BG_PRESSED];
+        }
+        if (bgImage != null) {
+            var sprite = cc.Sprite.create(bgImage);
+            sprite.setPosition(cc.p(x, y));
+            sprite.setContentSize(cc.size(w, h));
+            sprite.draw(context);
+        }	
     },
-
 });
+
