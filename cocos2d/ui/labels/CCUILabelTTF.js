@@ -33,10 +33,13 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _fontStyleStr: null,
     _colorStyleStr: null,
     _fontClientHeight:0,
+
     /**
      * Constructor
+     * @param fontStyleStr font name of cc.LabelTTF
+     * @param fontSize font size of cc.LabelTTF
      */
-    ctor: function (title, fontStyleStr, fontSize) {
+    ctor: function (fontStyleStr, fontSize) {
         this._super();
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
@@ -45,6 +48,8 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         this._colorStyleStr = "";
         this._opacity = 255;
         this._color = cc.white();
+        this._fontStyleStr = fontStyleStr;
+        this._fontSize = fontSize;
         this._setColorStyleStr();
     },
 
@@ -103,7 +108,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         return this._opacity;
     },
 
-
     /**
      * opacity: conforms to CCRGBAProtocol protocol
      * @param {Boolean} value
@@ -121,7 +125,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     isOpacityModifyRGB: function () {
         return this._opacityModifyRGB;
     },
-
 
     _setColorStyleStr: function () {
         this._colorStyleStr = "rgba(" + this._color.r + "," + this._color.g + "," + this._color.b + ", " + this._opacity / 255 + ")";
@@ -150,8 +153,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         }
     },
 
-
-
     /**
      * return Horizontal Alignment of cc.ui.LabelTTF
      * @return {cc.TEXT_ALIGNMENT_LEFT|cc.TEXT_ALIGNMENT_CENTER|cc.TEXT_ALIGNMENT_RIGHT}
@@ -159,7 +160,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     getHorizontalAlignment: function () {
         return this._hAlignment;
     },
-
 
     /**
      * set Horizontal Alignment of cc.ui.LabelTTF
@@ -202,7 +202,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     getDimensions: function () {
         return this._dimensions;
     },
-
 
     /**
      * set Dimensions of cc.ui.LabelTTF
