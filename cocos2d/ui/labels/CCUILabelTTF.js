@@ -21,7 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
+cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     /// ---- common properties start    ----
     _dimensions: null,
     _hAlignment: cc.TEXT_ALIGNMENT_CENTER,
@@ -315,3 +315,6 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         cc.INCREMENT_GL_DRAWS(1);
     }
 });
+
+cc.ui.LabelTTF._textAlign = ["left", "center", "right"];
+cc.ui.LabelTTF._textBaseline = ["top", "middle", "bottom"];
