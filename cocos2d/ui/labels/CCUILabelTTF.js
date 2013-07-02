@@ -266,6 +266,59 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
             if (this._string.length > 0) this._updateTTF();
         }
     },
+    _updateTTF:function () {
+         _getLabelContext();
+        var stringWidth = this._labelContext.measureText(this._string).width;
+        /** 
+        This is for line wrapping and multiline, logic may not be correct. In V1 we do no allow multiline
+	if(this._string.indexOf('\n') !== -1 || (this._dimensions.width !== 0 && stringWidth > this._dimensions.width && this._string.indexOf(" ") !== -1)) {
+            var strings = this._strings = this._string.split('\n');
+            var lineWidths = this._lineWidths = [];
+            for (var i = 0; i < strings.length; i++) {
+                if (strings[i].indexOf(" ") !== -1 && this._dimensions.width > 0) {
+                    var percent = this._dimensions.width / this._labelContext.measureText(this._strings[i]).width;
+                    var startSearch = 0 | (percent * strings[i].length + 1);
+                    var cutoff = startSearch;
+                    var tempLineWidth = 0;
+                    if (percent < 1) {
+                        do {
+                            cutoff = strings[i].lastIndexOf(" ", cutoff - 1);
+                            var str = strings[i].substring(0, cutoff);
+                            tempLineWidth = this._labelContext.measureText(str).width;
+                            if (cutoff === -1) {
+                                cutoff = strings[i].indexOf(" ", startSearch);
+                                break;
+                            }
+                        } while (tempLineWidth > this._dimensions.width);
+                        var newline = strings[i].substr(cutoff + 1);
+                        strings.splice(i + 1, 0, newline);
+                        strings[i] = str;
+                    }
+                }
+                lineWidths[i] = tempLineWidth || this._labelContext.measureText(strings[i]).width;
+            }
+            this._isMultiLine = true;
+        } else
+            this._isMultiLine = false;
+        */
+
+        if (this._dimensions.width === 0) {
+            //if (this._isMultiLine)
+            //    this.setContentSize(cc.size(Math.max.apply(Math, this._lineWidths), this._fontClientHeight * this._strings.length));
+            //else
+            //    this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
+            this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
+            // TODO: figure out what anchorPointInPoints does
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+        } else {
+            //dimension is already set, contentSize must be same as dimension
+            this.setContentSize(cc.size(this._dimensions.width, this._dimensions.height));
+            // TODO: Figure out what anchorPointsInPoint does
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+        }
+    },
+
+
 
  /**
      * The <a name="stretchAndAlign">stretchAndAlign()</a> method stretches 
