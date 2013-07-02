@@ -50,7 +50,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
         this._fontStyleStr = "";
-        this._colorUnmodified = c.white();
+        this._colorUnmodified = cc.white();
         this._colorStyleStr = "";
         this._opacity = 255;
         this._color = cc.white();
@@ -237,6 +237,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     setFontSize: function (fontSize) {
         if (this._fontSize != fontSize) {
             this._fontSize = fontSize;
+                                this.context.setFontSize(fontSize);
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
@@ -271,10 +272,11 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      */
     calculateStringWidth: function(){
           return this._labelContext.measureText(this._string).width;
-    }
+    },
     _updateTTF:function () {
-         _getLabelContext();
-         var stringWidth = calculateStringWidth();
+         this.getLabelContext();
+         this._labelContext.font=this._fontStyleStr;
+         var stringWidth = this.calculateStringWidth();
         /** 
         This is for line wrapping and multiline, logic may not be correct. In V1 we do no allow multiline
 	if(this._string.indexOf('\n') !== -1 || (this._dimensions.width !== 0 && stringWidth > this._dimensions.width && this._string.indexOf(" ") !== -1)) {
@@ -342,8 +344,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      *        label may stretch and align its text components
      */
     stretchAndAlign : function(width, height) {
-        try {
-
             cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
             cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, new size: " + width + ", " + height);
 
@@ -366,8 +366,8 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
             setDimensions(dim);
             this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
             this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
-
-            var stringWidth = calculateStringWidth();
+            
+            var stringWidth = this.calculateStringWidth();
             // contentSize set in CCNode.js
             if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
                 this._xOffset = this._contentSize.width-stringWidth;
@@ -385,13 +385,14 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
                 this._yOffset = 0;       
     },
 
-    _getLabelContext:function () {
+    getLabelContext:function () {
         if (this._labelContext)
             return this._labelContext;
 
         if (!this._labelCanvas) {
             this._labelCanvas = document.createElement("canvas");
         }
+                                debugger;
         this._labelContext = this._labelCanvas.getContext("2d");
         return this._labelContext;
     },
