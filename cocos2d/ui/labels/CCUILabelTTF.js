@@ -33,6 +33,12 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _fontStyleStr: null,
     _colorStyleStr: null,
     _fontClientHeight:0,
+    _baseline = null,
+    _textAlign = null,
+    _xoffset = 0,
+    _labelCanvas = null,
+    _labelContext = null,
+
     /**
      * Constructor
      */
@@ -262,6 +268,204 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         }
     },
 
+ /**
+     * The <a name="stretchAndAlign">stretchAndAlign()</a> method stretches 
+     * this text in the label to the given <i>Width</i> and <i>Height</i> (not 
+     * including margin, border, and padding).
+     * <br /><br />
+     * <b>NOTE&#58;</b> 
+     * Following <i>doLayout(),</i> <i>stretchAndAlign()</i> assigns a final 
+     * size to this label. If different than the preferred <i>doLayout()
+     * </i> size, the <i>stretchAndAlign()</i> parameters of <i>Width</i> and 
+     * <i>Height</i> represent final label dimensions.
+     * @param width Final width of this text label, in which this
+     *        label may stretch and align its text components
+     * @param height Final height of this text label, in which this
+     *        label may stretch and align its text components
+     */
+    stretchAndAlign : function(width, height) {
+        try {
+
+            cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
+            cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, new size: " + width + ", " + height);
+
+            // Do any default re-sizing
+            this._super(width, height);
+
+            // Remove margins, padding and border from overall size dimensions
+            width -= (this.$margin.l + this.$margin.r + this.$padding.l + this.$padding.r);
+            height -= (this.$margin.t + this.$margin.b + this.$padding.t + this.$padding.b);
+            if (this.$border != null) {
+                var bw = this.$border.getWidths();
+                width -= (bw.left + bw.right);
+                height -= (bw.top + bw.bottom);
+            }
+            // calculate exact width and height from font * #characters
+            // get dimensions
+            // figure out how much space you are actually taking up
+            // text alignment, component alignment 
+
+            this._baseline = cc.LabelTTF._textBaseline[this._vAlignment];
+            this._textAlign = cc.LabelTTF._textAlign[this._hAlignment];
+
+            // contentSize set in CCNode.js
+            if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+                this._xoffset = this._contentSize.width;
+            else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER)
+                this._xoffset = this._contentSize.width / 2;
+            else if (this._hAlignment === cc.TEXT_ALIGNMENT_LEFT)
+                this._xoffset = 0;
+
+            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP)
+                this._xoffset = this._contentSize.;
+            else if (this._vAlignment === cc.TEXT_ALIGNMENT_CENTER)
+                this._xoffset = this._contentSize.width / 2;
+            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+                this._yOffset = this._fontSize + this._contentSize.height - this._fontSize * this._strings.length;
+
+  var yOffset = 0;
+            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+                
+            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+                yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
+
+
+            var size = null;
+            var loc = null;
+            
+            var x = null;
+            var y = null;
+            
+            var leftEdge = this.$ibounds.x;
+            
+            var rightEdge = this.$ibounds.x + this.$ibounds.w;
+            
+            var align = null;
+            
+            var ctrPoint = leftEdge + Math.floor(width / 2);
+            var ctrLeft = -1;
+            var ctrRight = -1;
+            var ctrWidth = 0;
+            
+            var pos = null;
+            
+            // Move right to left and align text Horizontally.            
+            // This loop first right-justifies components, then attempts
+            // to horizontally place components as best it can
+            for (var i = children.length - 1; i >= 0; i--) {
+                if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                    continue;
+                }
+
+                size = children[i].getContentSize();
+                pos = children[i].getPosition();
+
+                align = children[i].getHorizAlign();
+
+                switch (align) {
+                    case cc.ui.Constants.ALGN_RIGHT:
+                        // Right Justified
+                        rightEdge -= size.width;
+                        if (rightEdge < pos.x) {
+                            // Never allow the component to be moved
+                            // further right than where it would normally be
+                            // (because that means there are other components 
+                            // taking up the space left of this one)
+                            rightEdge = pos.x;
+                        }
+                        children[i].setPositionX(rightEdge);
+                        break;
+                    case cc.ui.Constants.ALGN_CENTER:
+                        // Keep track of the indexes of the first 'center' child and
+                        // the last 'center' child, as well as the overall width
+                        // of all children 'center' aligned
+                        if (i > ctrRight) {
+                            ctrRight = i;
+                        }
+                        ctrLeft = i;
+                        ctrWidth += size.width;
+                        break;
+                    case cc.ui.Constants.ALGN_LEFT:
+                    default:
+                        // Left is default
+                        x = pos.x + size.width;
+                        if (x > leftEdge) {
+                            // Keep track of the right of the 'left' aligned components
+                            leftEdge = x;
+                        }
+                        break;                
+                }
+
+                // We stretch and align all child components to be the same
+                // height
+                if (children[i].shouldStretch()) {
+                    children[i].stretchAndAlign(size.width, height);                        
+                } else {
+                    children[i].stretchAndAlign(size.width, size.height);                    
+                    // Align children vertically
+                    if (size.height < height) {                                                             
+                        switch (children[i].getVertAlign()) {
+                            case cc.ui.Constants.ALGN_TOP:
+                                break;
+                            case cc.ui.Constants.ALGN_MIDDLE:
+                                children[i].setPositionY( 
+                                    this.$ibounds.y + 
+                                    Math.floor((height - size.height) / 2));                                
+                                break;
+                            case cc.ui.Constants.ALGN_BOTTOM:
+                                children[i].setPositionY(this.$ibounds.y);
+                                break;
+                        }
+                    }
+                }
+            } // first for loop
+            
+            // We now know the left edge of the right-justified components,
+            // left edge of the right-justified components, the combined
+            // width of the centered components, and the center point of
+            // the container.           
+            if (ctrWidth > 0) {
+                var minX = leftEdge;
+                var maxX = rightEdge;
+                var availWidth = rightEdge - leftEdge;
+                console.log("HBOX CENTERED, rightEdge: " + rightEdge + ", leftEdge: " + leftEdge);
+                console.log("HBOX CENTERED, available width: " + availWidth);
+                console.log("HBOX CENTERED, need width: " + ctrWidth);
+                if (availWidth > ctrWidth) {
+                    var space = Math.floor((availWidth - ctrWidth) / 2);
+                    x = leftEdge + space;
+                } else {
+                    x = leftEdge;
+                }
+                console.log("HBOX, ctrLeft: " + ctrLeft + ", ctrRight: " + ctrRight);
+                for (i = ctrLeft; i <= ctrRight; i++) {
+                    if (!children[i] || !cc.ui.instanceOf(children[i], cc.ui.Component)) {
+                        continue;
+                    }
+                    children[i].setPositionX(x);
+                    size = children[i].getContentSize();
+                    x += size.width;
+                }
+            }
+            
+        } catch (err) {
+            cc.ui.logE("cc.ui.boxes",
+                       "HBox.stretchAndAlign error: " + err);
+        }          
+    },
+
+    _getLabelContext:function () {
+        if (this._labelContext)
+            return this._labelContext;
+
+        if (!this._labelCanvas) {
+            this._labelCanvas = document.createElement("canvas");
+        }
+        this._labelContext = this._labelCanvas.getContext("2d");
+        return this._labelContext;
+    },
+
+
     /**
      * renders the label
      * @param {CanvasContext|Null} ctx
@@ -279,21 +483,12 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         if (context.font != this._fontStyleStr)
             context.font = this._fontStyleStr;
 
-        context.textBaseline = cc.LabelTTF._textBaseline[this._vAlignment];
-        context.textAlign = cc.LabelTTF._textAlign[this._hAlignment];
-        var xoffset = 0;
-        // contentSize set in CCNode.js
-        if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
-            xoffset = this._contentSize.width;
-        else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER)
-            xoffset = this._contentSize.width / 2;
-        if (this._isMultiLine) {
-            var yOffset = 0;
-            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
-                yOffset = this._fontSize + this._contentSize.height - this._fontSize * this._strings.length;
-            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
-                yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
+        context.textBaseline = this_.textBaseLine;
+        context.textAlign = this._textAlign;
 
+        
+        if (this._isMultiLine) {
+          
             for (var i = 0; i < this._strings.length; i++) {
                 var line = this._strings[i];
                 context.fillText(line, xoffset, -this._contentSize.height + (this._fontSize * i) + yOffset);
@@ -315,3 +510,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         cc.INCREMENT_GL_DRAWS(1);
     }
 });
+
+cc.LabelTTFCanvas._textAlign = ["left", "center", "right"];
+
+cc.LabelTTFCanvas._textBaseline = ["top", "middle", "bottom"];
