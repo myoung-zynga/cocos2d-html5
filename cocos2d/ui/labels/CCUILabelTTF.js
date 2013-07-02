@@ -21,7 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
+cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     /// ---- common properties start    ----
     _dimensions: null,
     _hAlignment: cc.TEXT_ALIGNMENT_CENTER,
@@ -36,13 +36,14 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _baseline = null,
     _textAlign = null,
     _xoffset = 0,
+    _yOffset = 0,
     _labelCanvas = null,
     _labelContext = null,
 
     /**
      * Constructor
      */
-    ctor: function () {
+    ctor: function (title, fontStyleStr, fontSize) {
         this._super();
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
@@ -65,7 +66,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      * @return {String}
      */
     description: function () {
-        return "<cc.LabelTTF | FontName =" + this._fontName + " FontSize = " + this._fontSize.toFixed(1) + ">";
+        return "<cc.ui.LabelTTF | FontName =" + this._fontName + " FontSize = " + this._fontSize.toFixed(1) + ">";
     },
 
     setColor: function (color3) {
@@ -143,7 +144,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
     /**
      * changes the string to render
-     * @warning Changing the string is as expensive as creating a new cc.LabelTTF. To obtain better performance use cc.LabelAtlas
+     * @warning Changing the string is as expensive as creating a new cc.ui.LabelTTF. To obtain better performance use cc.LabelAtlas
      * @param {String} text text for the label
      */
     setString: function (text) {
@@ -159,7 +160,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * return Horizontal Alignment of cc.LabelTTF
+     * return Horizontal Alignment of cc.ui.LabelTTF
      * @return {cc.TEXT_ALIGNMENT_LEFT|cc.TEXT_ALIGNMENT_CENTER|cc.TEXT_ALIGNMENT_RIGHT}
      */
     getHorizontalAlignment: function () {
@@ -168,7 +169,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * set Horizontal Alignment of cc.LabelTTF
+     * set Horizontal Alignment of cc.ui.LabelTTF
      * @param {cc.TEXT_ALIGNMENT_LEFT|cc.TEXT_ALIGNMENT_CENTER|cc.TEXT_ALIGNMENT_RIGHT} alignment Horizontal Alignment
      */
     setHorizontalAlignment: function (alignment) {
@@ -181,7 +182,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return Vertical Alignment of cc.LabelTTF
+     * return Vertical Alignment of cc.ui.LabelTTF
      * @return {cc.VERTICAL_TEXT_ALIGNMENT_TOP|cc.VERTICAL_TEXT_ALIGNMENT_CENTER|cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM}
      */
     getVerticalAlignment: function () {
@@ -189,7 +190,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * set Vertical Alignment of cc.LabelTTF
+     * set Vertical Alignment of cc.ui.LabelTTF
      * @param {cc.VERTICAL_TEXT_ALIGNMENT_TOP|cc.VERTICAL_TEXT_ALIGNMENT_CENTER|cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM} verticalAlignment
      */
     setVerticalAlignment: function (verticalAlignment) {
@@ -202,7 +203,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return Dimensions of cc.LabelTTF
+     * return Dimensions of cc.ui.LabelTTF
      * @return {cc.Size}
      */
     getDimensions: function () {
@@ -211,7 +212,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * set Dimensions of cc.LabelTTF
+     * set Dimensions of cc.ui.LabelTTF
      * @param {cc.Size} dim
      */
     setDimensions: function (dim) {
@@ -224,7 +225,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * return font size of cc.LabelTTF
+     * return font size of cc.ui.LabelTTF
      * @return {Number}
      */
     getFontSize: function () {
@@ -247,7 +248,7 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
 
     /**
-     * return font name of cc.LabelTTF
+     * return font name of cc.ui.LabelTTF
      * @return {String}
      */
     getFontName: function () {
@@ -255,14 +256,14 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     },
 
     /**
-     * set font name of cc.LabelTTF
+     * set font name of cc.ui.LabelTTF
      * @param {String} fontName
      */
     setFontName: function (fontName) {
         if (this._fontName != fontName) {
             this._fontName = new String(fontName);
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
-            this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
+            this._fontClientHeight = cc.ui.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
         }
@@ -305,8 +306,8 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
             // figure out how much space you are actually taking up
             // text alignment, component alignment 
 
-            this._baseline = cc.LabelTTF._textBaseline[this._vAlignment];
-            this._textAlign = cc.LabelTTF._textAlign[this._hAlignment];
+            this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
+            this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
 
             // contentSize set in CCNode.js
             if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
@@ -317,19 +318,14 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
                 this._xoffset = 0;
 
             if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP)
-                this._xoffset = this._contentSize.;
-            else if (this._vAlignment === cc.TEXT_ALIGNMENT_CENTER)
-                this._xoffset = this._contentSize.width / 2;
+                // FIXME: this is wrong I am not sure how to align top
+                this._yOffset = this._contentSize;
+            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+                this._yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
             else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
                 this._yOffset = this._fontSize + this._contentSize.height - this._fontSize * this._strings.length;
 
-  var yOffset = 0;
-            if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
-                
-            else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
-                yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
-
-
+            // this is just copy paste below in this method
             var size = null;
             var loc = null;
             
@@ -485,7 +481,6 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
         context.textBaseline = this_.textBaseLine;
         context.textAlign = this._textAlign;
-
         
         if (this._isMultiLine) {
           
@@ -511,6 +506,21 @@ cc.Label = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     }
 });
 
-cc.LabelTTFCanvas._textAlign = ["left", "center", "right"];
 
-cc.LabelTTFCanvas._textBaseline = ["top", "middle", "bottom"];
+cc.ui.LabelTTF._textAlign = ["left", "center", "right"];
+cc.ui.LabelTTF._textBaseline = ["top", "middle", "bottom"];
+cc.ui.LabelTTF.__labelHeightDiv = document.createElement("div");
+cc.ui.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
+cc.ui.LabelTTF.__labelHeightDiv.innerHTML = "ajghl~!";
+cc.ui.LabelTTF.__labelHeightDiv.style.position = "absolute";
+cc.ui.LabelTTF.__labelHeightDiv.style.left = "-100px";
+cc.ui.LabelTTF.__labelHeightDiv.style.top = "-100px";
+document.body.appendChild(cc.ui.LabelTTF.__labelHeightDiv);
+
+cc.ui.LabelTTF.__getFontHeightByDiv = function(fontName, fontSize){
+    var labelDiv = cc.ui.LabelTTF.__labelHeightDiv;
+    labelDiv.style.fontFamily = fontName;
+    labelDiv.style.fontSize = fontSize + "px";
+    return labelDiv.clientHeight ;
+};
+
