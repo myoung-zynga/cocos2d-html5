@@ -346,6 +346,7 @@ cc.LabelTTFCanvas = cc.Sprite.extend(/** @lends cc.LabelTTFCanvas# */{
 
         context.textBaseline = cc.LabelTTF._textBaseline[this._vAlignment];
         context.textAlign = cc.LabelTTF._textAlign[this._hAlignment];
+        context.textAlign = this._textAlign;
         var xoffset = 0;
         if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
             xoffset = this._contentSize.width;
