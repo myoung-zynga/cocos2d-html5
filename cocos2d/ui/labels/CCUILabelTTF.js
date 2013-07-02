@@ -35,7 +35,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _fontClientHeight:0,
     _baseline : null,
     _textAlign : null,
-    _xoffset : 0,
+    _xOffset : 0,
     _yOffset : 0,
     _labelCanvas : null,
     _labelContext : null,
@@ -309,15 +309,15 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
             // contentSize set in CCNode.js
             if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT)
-                this._xoffset = this._contentSize.width;
+                this._xOffset = this._contentSize.width;
             else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER)
-                this._xoffset = this._contentSize.width / 2;
+                this._xOffset = this._contentSize.width / 2;
             else if (this._hAlignment === cc.TEXT_ALIGNMENT_LEFT)
-                this._xoffset = 0;
+                this._xOffset = 0;
 
             if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP)
                 // FIXME: this is wrong I am not sure how to align top
-                this._yOffset = this._contentSize;
+                this._yOffset = 0;
             else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
                 this._yOffset = this._fontSize / 2 + (this._contentSize.height - this._fontSize * this._strings.length) / 2;
             else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
