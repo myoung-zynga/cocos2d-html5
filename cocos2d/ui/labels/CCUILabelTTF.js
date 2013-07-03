@@ -47,17 +47,20 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      * @param fontStyleStr font name of cc.LabelTTF
      * @param fontSize font size of cc.LabelTTF
      */
-    ctor: function (fontName, fontSize) {
+    ctor: function (string, fontName, fontSize) {
         this._super();
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
         this._colorUnmodified = cc.white();
         this._colorStyleStr = "";
+        this.setString(string);
         this.setColor(cc.white());
-        this.setFontSize(fontName);
+        this.setFontSize(fontSize);
         this.setFontName(fontName);
         this.setOpacity(255);
         this._setColorStyleStr();
+        this._labelCanvas = document.createElement("canvas");
+        this._labelContext = this._labelCanvas.getContext("2d");
     },
 
     init: function (callsuper) {
@@ -243,6 +246,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._fontSize != fontSize) {
             this._fontSize = fontSize;
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
+            debugger;
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
@@ -278,15 +282,17 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._string == null) {
             return 0;
         }
+
+        this._labelContext.font = this._fontStyleStr;
         return this._labelContext.measureText(this._string).width;
     },
     _updateTTF: function () {
-        this.getLabelContext();
-        this._labelContext.font = this._fontStyleStr;
-        var stringWidth = this.calculateStringWidth();
-        /** 
-        This is for line wrapping and multiline, logic may not be correct. In V1 we do no allow multiline
-    if(this._string.indexOf('\n') !== -1 || (this._dimensions.width !== 0 && stringWidth > this._dimensions.width && this._string.indexOf(" ") !== -1)) {
+        //this.getLabelContext();
+        //this._labelContext.font = this._fontStyleStr;
+        //var stringWidth = this.calculateStringWidth();
+        /**
+         This is for line wrapping and multiline, logic may not be correct. In V1 we do no allow multiline
+         if(this._string.indexOf('\n') !== -1 || (this._dimensions.width !== 0 && stringWidth > this._dimensions.width && this._string.indexOf(" ") !== -1)) {
             var strings = this._strings = this._string.split('\n');
             var lineWidths = this._lineWidths = [];
             for (var i = 0; i < strings.length; i++) {
@@ -314,41 +320,29 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
             }
             this._isMultiLine = true;
         } else
-            this._isMultiLine = false;
-        */
+         this._isMultiLine = false;
+         */
 
-        if (this._dimensions.width === 0) {
-            //if (this._isMultiLine)
-            //    this.setContentSize(cc.size(Math.max.apply(Math, this._lineWidths), this._fontClientHeight * this._strings.length));
-            //else
-            //    this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
-            this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
-            // TODO: figure out what anchorPointInPoints does
-            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
-        } else {
-            //dimension is already set, contentSize must be same as dimension
-            this.setContentSize(cc.size(this._dimensions.width, this._dimensions.height));
-            // TODO: Figure out what anchorPointsInPoint does
-            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
-        }
+//        if (this._dimensions.width === 0) {
+//            //if (this._isMultiLine)
+//            //    this.setContentSize(cc.size(Math.max.apply(Math, this._lineWidths), this._fontClientHeight * this._strings.length));
+//            //else
+//            //    this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
+//            this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
+//            // TODO: figure out what anchorPointInPoints does
+//            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+//        } else {
+//            //dimension is already set, contentSize must be same as dimension
+//            this.setContentSize(cc.size(this._dimensions.width, this._dimensions.height));
+//            // TODO: Figure out what anchorPointsInPoint does
+//            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+//        }
     },
 
-
-
     /**
-     * The <a name="stretchAndAlign">stretchAndAlign()</a> method stretches 
-     * this text in the label to the given <i>Width</i> and <i>Height</i> (not 
-     * including margin, border, and padding).
-     * <br /><br />
-     * <b>NOTE&#58;</b> 
-     * Following <i>doLayout(),</i> <i>stretchAndAlign()</i> assigns a final 
-     * size to this label. If different than the preferred <i>doLayout()
-     * </i> size, the <i>stretchAndAlign()</i> parameters of <i>Width</i> and 
-     * <i>Height</i> represent final label dimensions.
-     * @param width Final width of this text label, in which this
-     *        label may stretch and align its text components
-     * @param height Final height of this text label, in which this
-     *        label may stretch and align its text components
+     * @override
+     * @param width
+     * @param height
      */
     stretchAndAlign: function (width, height) {
         cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
@@ -368,22 +362,21 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         // calculate exact width and height from font * #characters
         // get dimensions
         // figure out how much space you are actually taking up
-        // text alignment, component alignment 
+        // text alignment, component alignment
         var dim = cc.size(width, height);
         this.setDimensions(dim);
-        this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
-        this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
+//        this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
+//        this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
 
-        var stringWidth = this.calculateStringWidth();
-        // contentSize set in CCNode.js
+        var stringWidth = this.calculateStringWidth(this._fontName, this._fontSize);
+        var stringHeight = this._fontSize;
+
         if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT) this._xOffset = this._contentSize.width - stringWidth;
-        else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER) this._xOffset = this._contentSize.width / 2 - stringWidth / 2;
+        else if (this._hAlignment === cc.TEXT_ALIGNMENT_CENTER) this._xOffset = (this._contentSize.width / 2) - (stringWidth / 2);
         else if (this._hAlignment === cc.TEXT_ALIGNMENT_LEFT) this._xOffset = 0;
 
-        if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP)
-        // FIXME: this is wrong I am not sure how to align top
-        this._yOffset = -this._contentSize.height;
-        else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER) this._yOffset = -this._contentSize.height / 2;
+        if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) this._yOffset = 0 + stringHeight - this._contentSize.height;
+        else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER) this._yOffset = 0 + (stringHeight / 2) - (this._contentSize.height/2);
         else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) this._yOffset = 0;
     },
 
@@ -397,34 +390,20 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         return this._labelContext;
     },
 
-
     /**
      * renders the label
      * @param {CanvasContext|Null} ctx
      */
-    draw: function (ctx, renderType) {
+    draw : function (ctx) {
         var context = ctx || cc.renderContext;
-        if (this._flipX) context.scale(-1, 1);
-        if (this._flipY) context.scale(1, -1);
 
-        //this is fillText for canvas
+
+        context.font = this._labelContext.font;
         context.fillStyle = this._colorStyleStr;
+        context.fillText(this._string, this._xOffset, this._yOffset);
 
-        if (context.font != this._fontStyleStr) context.font = this._fontStyleStr;
-
-        context.textBaseline = this._textBaseLine;
-        context.textAlign = this._textAlign;
-
-        if (this._isMultiLine) {
-
-            for (var i = 0; i < this._strings.length; i++) {
-                var line = this._strings[i];
-                context.fillText(line, xoffset, -this._contentSize.height + (this._fontSize * i) + yOffset);
-            }
-        } else {
-            context.fillText(this._string, this._xoffset, this._yOffset);
-        }
-        //cc.INCREMENT_GL_DRAWS(1);
+        context.fillStyle = "rgba(255,0,0,0.2)";
+        context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
     }
 });
 
