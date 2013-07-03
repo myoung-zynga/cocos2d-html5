@@ -1,3 +1,4 @@
+git commit -m "added preferred size, but it does not work correctly when the container box is smaller then full text size"
 /****************************************************************************
  Copyright (c) 2013      Zynga Inc.
  
@@ -52,7 +53,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      */
     ctor: function (string, fontName, fontSize) {
         this._super();
-        this._dimensions = cc.SizeZero();
+        this._dimensions = cc.size(-1, -1);
         this._opacityModifyRGB = false;
         this._colorUnmodified = cc.white();
         this._colorStyleStr = "";
@@ -148,6 +149,30 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     _setColorStyleStr: function () {
         this._colorStyleStr = "rgba(" + this._color.r + "," + this._color.g + "," + this._color.b + ", " + this._opacity / 255 + ")";
     },
+
+
+    /**
+     * Called to manually set the preferred dimensions of this text label.
+     * The preferred size dimensions
+     * should include the sizing necessary to include the Component's margin,
+     * border, padding, and content. If a user sets the dimensions then that will 
+     * be the preferred size. Otherwise, the preferred size will be the minimum size possible
+     * for the text to be shown.
+     * 
+     */
+    determinePreferredSize: function () {
+        //FIXME: figure out how to set preferred size if text is too big to fit in container box, combination of this method and stretchAndAlign"
+        if (this._dimensions.width == -1 || this._dimensions.height == -1) {
+            var stringWidth = this.calculateStringWidth(this._string);
+            var stringHeight = this._fontSize;
+            this.$prefSize.w = stringWidth;
+            this.$prefSize.h = stringHeight;
+        } else {
+            this.$prefSize.w = this._contentSize.width;
+            this.$prefSize.h = this._contentSize.height;
+        }
+    },
+
 
     /**
      * returns the text of the label
@@ -288,8 +313,9 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     },
     _updateTTF: function () {
         this.getLabelContext();
+        this.determinePreferredSize();
         this._labelContext.font = this._fontStyleStr;
-        var stringWidth = this.calculateStringWidth(this._string);
+        var stringWidth = this.clipString(this._string, this._contentSize.width, this._hAlignment);
         if (this._dimensions.width === 0) {
             this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
             // TODO: figure out what anchorPointInPoints does
@@ -338,7 +364,6 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         var dim = cc.size(width, height);
         this.setDimensions(dim);
 
-                                      debugger;
         var clippedString = this.clipString(this._string, this._contentSize.width, this._hAlignment);
 
         var stringWidth = this.calculateStringWidth(clippedString);
@@ -370,7 +395,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      * @param horAlign
      * @returns {string}
      */
-    clipString : function (string, maxWidth, horAlign) {
+    clipString: function (string, maxWidth, horAlign) {
         var clippedString = "";
         var tempClippedString = "";
         var clippedStringCurrentSize = 0;
@@ -386,7 +411,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
             }
 
         } else if (horAlign === cc.TEXT_ALIGNMENT_CENTER) {
-            var midIndex = Math.floor(string.length/2);
+            var midIndex = Math.floor(string.length / 2);
             var charAtMid = string.charAt(midIndex);
             clippedString += charAtMid;
             clippedStringCurrentSize += this.calculateStringWidth(charAtMid);
@@ -429,10 +454,10 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         var stringToDraw = this.clipString(this._string, this._contentSize.width, this._hAlignment);
         context.fillText(stringToDraw, this._xOffset, this._yOffset);
 
-//        if (cc.SPRITE_DEBUG_DRAW === 1) {
-            context.fillStyle = "rgba(255,0,0,0.2)";
-            context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
-//        }
+        //        if (cc.SPRITE_DEBUG_DRAW === 1) {
+        context.fillStyle = "rgba(255,0,0,0.2)";
+        context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
+        //        }
     }
 });
 
