@@ -338,7 +338,6 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         var dim = cc.size(width, height);
         this.setDimensions(dim);
 
-                                      debugger;
         var clippedString = this.clipString(this._string, this._contentSize.width, this._hAlignment);
 
         var stringWidth = this.calculateStringWidth(clippedString);
