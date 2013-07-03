@@ -21,7 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
+cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     /// ---- common properties start    ----
     _dimensions: null,
     _hAlignment: cc.TEXT_ALIGNMENT_CENTER,
@@ -36,6 +36,8 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     _baseline: null,
     _textAlign: null,
     _xOffset: 0,
+    _color: cc.white(),
+    _opacity: 255,
     _yOffset: 0,
     _labelCanvas: null,
     _labelContext: null,
@@ -45,17 +47,16 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      * @param fontStyleStr font name of cc.LabelTTF
      * @param fontSize font size of cc.LabelTTF
      */
-    ctor: function (fontStyleStr, fontSize) {
+    ctor: function (fontName, fontSize) {
         this._super();
         this._dimensions = cc.SizeZero();
         this._opacityModifyRGB = false;
-        this._fontStyleStr = "";
         this._colorUnmodified = cc.white();
         this._colorStyleStr = "";
-        this._opacity = 255;
-        this._color = cc.white();
-        this._fontStyleStr = fontStyleStr;
-        this._fontSize = fontSize;
+        this.setColor(cc.white());
+        this.setFontSize(fontName);
+        this.setFontName(fontName);
+        this.setOpacity(255);
         this._setColorStyleStr();
     },
 
@@ -75,6 +76,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
     setColor: function (color3) {
         // TODO: called super
+
         if ((this._color.r == color3.r) && (this._color.g == color3.g) && (this._color.b == color3.b)) return;
 
         this._color = this._colorUnmodified = new cc.Color3B(color3.r, color3.g, color3.b);
@@ -84,6 +86,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
             this._color.g = 0 | (color3.g * this._opacity / 255);
             this._color.b = 0 | (color3.b * this._opacity / 255);
         }
+
 
         this._setColorStyleStr();
     },
@@ -101,7 +104,9 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         if (this._opacity === opacity) return;
         // calls super TODO: figure out which super to call (webgl or canvas version)
         this._opacity = opacity;
-        this._setColorStyleStr();
+        if (this._color) {
+            this._setColorStyleStr();
+        }
     },
     //
     // RGBA protocol
@@ -237,7 +242,6 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     setFontSize: function (fontSize) {
         if (this._fontSize != fontSize) {
             this._fontSize = fontSize;
-            this.context.setFontSize(fontSize);
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
@@ -271,6 +275,9 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
      * calculate the strings width
      */
     calculateStringWidth: function () {
+        if (this._string == null) {
+            return 0;
+        }
         return this._labelContext.measureText(this._string).width;
     },
     _updateTTF: function () {
@@ -346,7 +353,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
     stretchAndAlign: function (width, height) {
         cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
         cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, new size: " + width + ", " + height);
-
+        cc.ui.logI("cc.ui.ccuilabelttf", "I called stretch and align");
         // Do any default re-sizing
         this._super(width, height);
 
@@ -362,8 +369,8 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         // get dimensions
         // figure out how much space you are actually taking up
         // text alignment, component alignment 
-        var dim = CC.size(width, height);
-        setDimensions(dim);
+        var dim = cc.size(width, height);
+        this.setDimensions(dim);
         this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
         this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
 
@@ -405,7 +412,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
 
         if (context.font != this._fontStyleStr) context.font = this._fontStyleStr;
 
-        context.textBaseline = this_.textBaseLine;
+        context.textBaseline = this._textBaseLine;
         context.textAlign = this._textAlign;
 
         if (this._isMultiLine) {
@@ -417,7 +424,7 @@ cc.ui.LabelTTF = cc.Node.extend( /** @lends cc.LabelTTFWebGL# */ {
         } else {
             context.fillText(this._string, this._xoffset, this._yOffset);
         }
-        cc.INCREMENT_GL_DRAWS(1);
+        //cc.INCREMENT_GL_DRAWS(1);
     }
 });
 
