@@ -27,7 +27,7 @@
 cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     /// ---- common properties start    ----
     _dimensions: null,
-    _hAlignment: cc.TEXT_ALIGNMENT_RIGHT,
+    _hAlignment: cc.TEXT_ALIGNMENT_CENTER,
     _vAlignment: cc.VERTICAL_TEXT_ALIGNMENT_TOP,
     _fontName: "Arial",
     _fontSize: 0.0,
@@ -224,7 +224,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
 
     /**
      * set Dimensions of cc.ui.LabelTTF
-     * @param {cc.Size} dim
+     * @param {cc.size} dim
      */
     setDimensions: function (dim) {
         if (dim.width != this._dimensions.width || dim.height != this._dimensions.height) {
@@ -280,16 +280,16 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     /**
      * Calculates the width of the string by using context's internal methods.
      */
-    calculateStringWidth: function () {
+    calculateStringWidth: function (string) {
         if (this._string == null) {
             return 0;
         }
-        return this._labelContext.measureText(this._string).width;
+        return this._labelContext.measureText(string).width;
     },
     _updateTTF: function () {
         this.getLabelContext();
         this._labelContext.font = this._fontStyleStr;
-        var stringWidth = this.calculateStringWidth();
+        var stringWidth = this.calculateStringWidth(this._string);
         if (this._dimensions.width === 0) {
             this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
             // TODO: figure out what anchorPointInPoints does
@@ -338,7 +338,10 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         var dim = cc.size(width, height);
         this.setDimensions(dim);
 
-        var stringWidth = this.calculateStringWidth(this._fontName, this._fontSize);
+                                      debugger;
+        var clippedString = this.clipString(this._string, this._contentSize.width, this._hAlignment);
+
+        var stringWidth = this.calculateStringWidth(clippedString);
         var stringHeight = this._fontSize;
 
         if (this._hAlignment === cc.TEXT_ALIGNMENT_RIGHT) this._xOffset = this._contentSize.width - stringWidth;
@@ -361,20 +364,75 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     },
 
     /**
+     * Clips the given string to fit the maxWidth passed in and with respect to the passed in horizontal alignment.
+     * @param string
+     * @param maxWidth
+     * @param horAlign
+     * @returns {string}
+     */
+    clipString : function (string, maxWidth, horAlign) {
+        var clippedString = "";
+        var tempClippedString = "";
+        var clippedStringCurrentSize = 0;
+        if (horAlign === cc.TEXT_ALIGNMENT_LEFT) {
+            for (var i = 0; i < string.length; i++) {
+                if (clippedStringCurrentSize >= maxWidth) {
+                    return tempClippedString;
+                }
+                tempClippedString = clippedString;
+                var charAtI = string.charAt(i);
+                clippedString += charAtI;
+                clippedStringCurrentSize += this.calculateStringWidth(charAtI);
+            }
+
+        } else if (horAlign === cc.TEXT_ALIGNMENT_CENTER) {
+            var midIndex = Math.floor(string.length/2);
+            var charAtMid = string.charAt(midIndex);
+            clippedString += charAtMid;
+            clippedStringCurrentSize += this.calculateStringWidth(charAtMid);
+            for (var i = 0; i < midIndex; i++) {
+                if (clippedStringCurrentSize >= maxWidth) {
+                    return tempClippedString;
+                }
+                tempClippedString = clippedString;
+                var charAtIMinusOffset = string.charAt(midIndex - i - 1);
+                var charAtIPlusOffset = string.charAt(midIndex + i + 1);
+                clippedString = charAtIMinusOffset + clippedString + charAtIPlusOffset;
+                clippedStringCurrentSize += this.calculateStringWidth(charAtIMinusOffset) + this.calculateStringWidth(charAtIPlusOffset);
+            }
+
+        } else if (horAlign === cc.TEXT_ALIGNMENT_RIGHT) {
+            for (var i = string.length - 1; i >= 0; i--) {
+                if (clippedStringCurrentSize >= maxWidth) {
+                    return tempClippedString;
+                }
+                tempClippedString = clippedString;
+                var charAtI = string.charAt(i);
+                clippedString = charAtI + clippedString;
+                clippedStringCurrentSize += this.calculateStringWidth(charAtI);
+            }
+        }
+        return clippedString;
+    },
+
+    /**
      * renders the label
      * @param {CanvasContext|Null} ctx
      */
     draw: function (ctx) {
+
         var context = ctx || cc.renderContext;
         context.fillStyle = this._colorStyleStr;
 
         if (context.font != this._fontStyleStr) context.font = this._fontStyleStr;
-        context.fillText(this._string, this._xOffset, this._yOffset);
 
-        if (cc.SPRITE_DEBUG_DRAW === 1) {
+        var stringToDraw = this.clipString(this._string, this._contentSize.width, this._hAlignment);
+        context.fillText(stringToDraw, this._xOffset, this._yOffset);
+
+//        if (cc.SPRITE_DEBUG_DRAW === 1) {
             context.fillStyle = "rgba(255,0,0,0.2)";
             context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
-        }
+//        }
     }
 });
 
