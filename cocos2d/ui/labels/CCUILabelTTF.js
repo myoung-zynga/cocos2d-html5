@@ -72,6 +72,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         }
         return this.initWithString([" ", this._fontName, this._fontSize]);
     },
+
     /**
      * Prints out a description of this class
      * @return {String}
@@ -114,6 +115,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
             this._setColorStyleStr();
         }
     },
+
     //
     // RGBA protocol
     //
@@ -249,7 +251,6 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._fontSize != fontSize) {
             this._fontSize = fontSize;
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
-            this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
         }
@@ -272,13 +273,12 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._fontName != fontName) {
             this._fontName = new String(fontName);
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
-            this._fontClientHeight = cc.ui.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
         }
     },
     /**
-     * calculate the strings width
+     * Calculates the width of the string by using context's internal methods.
      */
     calculateStringWidth: function () {
         if (this._string == null) {
@@ -318,9 +318,9 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      *        label may stretch and align its text components 
      */
     stretchAndAlign: function (width, height) {
-        cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
-        cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, new size: " + width + ", " + height);
-        cc.ui.logI("cc.ui.ccuilabelttf", "I called stretch and align");
+        cc.ui.logI("cc.ui.LabelTTF", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
+        cc.ui.logI("cc.ui.LabelTTF", "Text Size, new size: " + width + ", " + height);
+        cc.ui.logI("cc.ui.LabelTTF", "stretchAndAlign invoked");
         // Do any default re-sizing
         this._super(width, height);
 
@@ -332,7 +332,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
             width -= (bw.left + bw.right);
             height -= (bw.top + bw.bottom);
         }
-        // calculate exact width and height from text and font
+        // We calculate exact width and height from text and font
         // get dimensions
         // text alignment modifications
         var dim = cc.size(width, height);
@@ -366,31 +366,17 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      */
     draw: function (ctx) {
         var context = ctx || cc.renderContext;
-        //this is fillText for canvas
         context.fillStyle = this._colorStyleStr;
 
         if (context.font != this._fontStyleStr) context.font = this._fontStyleStr;
         context.fillText(this._string, this._xOffset, this._yOffset);
-        // For testing purposes only
-        context.fillStyle = "rgba(255,0,0,0.2)";
-        context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
+
+        if (cc.SPRITE_DEBUG_DRAW === 1) {
+            context.fillStyle = "rgba(255,0,0,0.2)";
+            context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
+        }
     }
 });
 
-
 cc.ui.LabelTTF._textAlign = ["left", "center", "right"];
 cc.ui.LabelTTF._textBaseline = ["top", "middle", "bottom"];
-cc.ui.LabelTTF.__labelHeightDiv = document.createElement("div");
-cc.ui.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
-cc.ui.LabelTTF.__labelHeightDiv.innerHTML = "ajghl~!";
-cc.ui.LabelTTF.__labelHeightDiv.style.position = "absolute";
-cc.ui.LabelTTF.__labelHeightDiv.style.left = "-100px";
-cc.ui.LabelTTF.__labelHeightDiv.style.top = "-100px";
-document.body.appendChild(cc.ui.LabelTTF.__labelHeightDiv);
-
-cc.ui.LabelTTF.__getFontHeightByDiv = function (fontName, fontSize) {
-    var labelDiv = cc.ui.LabelTTF.__labelHeightDiv;
-    labelDiv.style.fontFamily = fontName;
-    labelDiv.style.fontSize = fontSize + "px";
-    return labelDiv.clientHeight;
-};
