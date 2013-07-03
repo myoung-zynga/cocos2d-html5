@@ -21,10 +21,13 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+/**
+ * This class is a text label class extending from ui component.This class does no line wrapping or line breaks
+ */
 cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
     /// ---- common properties start    ----
     _dimensions: null,
-    _hAlignment: cc.TEXT_ALIGNMENT_CENTER,
+    _hAlignment: cc.TEXT_ALIGNMENT_RIGHT,
     _vAlignment: cc.VERTICAL_TEXT_ALIGNMENT_TOP,
     _fontName: "Arial",
     _fontSize: 0.0,
@@ -246,7 +249,6 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._fontSize != fontSize) {
             this._fontSize = fontSize;
             this._fontStyleStr = this._fontSize + "px '" + this._fontName + "'";
-            debugger;
             this._fontClientHeight = cc.LabelTTF.__getFontHeightByDiv(this._fontName, this._fontSize);
             // Force update
             if (this._string.length > 0) this._updateTTF();
@@ -282,67 +284,38 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         if (this._string == null) {
             return 0;
         }
-
-        this._labelContext.font = this._fontStyleStr;
         return this._labelContext.measureText(this._string).width;
     },
     _updateTTF: function () {
-        //this.getLabelContext();
-        //this._labelContext.font = this._fontStyleStr;
-        //var stringWidth = this.calculateStringWidth();
-        /**
-         This is for line wrapping and multiline, logic may not be correct. In V1 we do no allow multiline
-         if(this._string.indexOf('\n') !== -1 || (this._dimensions.width !== 0 && stringWidth > this._dimensions.width && this._string.indexOf(" ") !== -1)) {
-            var strings = this._strings = this._string.split('\n');
-            var lineWidths = this._lineWidths = [];
-            for (var i = 0; i < strings.length; i++) {
-                if (strings[i].indexOf(" ") !== -1 && this._dimensions.width > 0) {
-                    var percent = this._dimensions.width / this._labelContext.measureText(this._strings[i]).width;
-                    var startSearch = 0 | (percent * strings[i].length + 1);
-                    var cutoff = startSearch;
-                    var tempLineWidth = 0;
-                    if (percent < 1) {
-                        do {
-                            cutoff = strings[i].lastIndexOf(" ", cutoff - 1);
-                            var str = strings[i].substring(0, cutoff);
-                            tempLineWidth = this._labelContext.measureText(str).width;
-                            if (cutoff === -1) {
-                                cutoff = strings[i].indexOf(" ", startSearch);
-                                break;
-                            }
-                        } while (tempLineWidth > this._dimensions.width);
-                        var newline = strings[i].substr(cutoff + 1);
-                        strings.splice(i + 1, 0, newline);
-                        strings[i] = str;
-                    }
-                }
-                lineWidths[i] = tempLineWidth || this._labelContext.measureText(strings[i]).width;
-            }
-            this._isMultiLine = true;
-        } else
-         this._isMultiLine = false;
-         */
-
-//        if (this._dimensions.width === 0) {
-//            //if (this._isMultiLine)
-//            //    this.setContentSize(cc.size(Math.max.apply(Math, this._lineWidths), this._fontClientHeight * this._strings.length));
-//            //else
-//            //    this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
-//            this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
-//            // TODO: figure out what anchorPointInPoints does
-//            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
-//        } else {
-//            //dimension is already set, contentSize must be same as dimension
-//            this.setContentSize(cc.size(this._dimensions.width, this._dimensions.height));
-//            // TODO: Figure out what anchorPointsInPoint does
-//            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
-//        }
+        this.getLabelContext();
+        this._labelContext.font = this._fontStyleStr;
+        var stringWidth = this.calculateStringWidth();
+        if (this._dimensions.width === 0) {
+            this.setContentSize(cc.size(stringWidth, this._fontClientHeight));
+            // TODO: figure out what anchorPointInPoints does
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+        } else {
+            // dimension is already set, contentSize must be same as dimension
+            this.setContentSize(cc.size(this._dimensions.width, this._dimensions.height));
+            //  TODO: Figure out what anchorPointsInPoint does
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+        }
     },
 
     /**
-     * @override
-     * @param width
-     * @param height
+     * The <a name="stretchAndAlign">stretchAndAlign()</a> method stretches and aligns 
+     * this text in the label to the given <i>Width</i> and <i>Height</i> (not 
+     * including margin, border, and padding).
+     * <br /><br />
+     * <b>NOTE&#58;</b> 
+     * Following <i>doLayout(),</i> <i>stretchAndAlign()</i> assigns a final 
+     * size to this label. If different than the preferred <i>doLayout()
+     * </i> size, the <i>stretchAndAlign()</i> parameters of <i>Width</i> and 
+     * <i>Height</i> represent final label dimensions.
+     * @param width Final width of this text label, in which this
+     *        label may stretch and align its text components
+     * @param height Final height of this text label, in which this
+     *        label may stretch and align its text components 
      */
     stretchAndAlign: function (width, height) {
         cc.ui.logI("cc.ui.ccuilabelttf", "Text Size, old size: " + this._contentSize.width + ", " + this._contentSize.height);
@@ -359,14 +332,11 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
             width -= (bw.left + bw.right);
             height -= (bw.top + bw.bottom);
         }
-        // calculate exact width and height from font * #characters
+        // calculate exact width and height from text and font
         // get dimensions
-        // figure out how much space you are actually taking up
-        // text alignment, component alignment
+        // text alignment modifications
         var dim = cc.size(width, height);
         this.setDimensions(dim);
-//        this._baseline = cc.ui.LabelTTF._textBaseline[this._vAlignment];
-//        this._textAlign = cc.ui.LabelTTF._textAlign[this._hAlignment];
 
         var stringWidth = this.calculateStringWidth(this._fontName, this._fontSize);
         var stringHeight = this._fontSize;
@@ -376,7 +346,7 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
         else if (this._hAlignment === cc.TEXT_ALIGNMENT_LEFT) this._xOffset = 0;
 
         if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) this._yOffset = 0 + stringHeight - this._contentSize.height;
-        else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER) this._yOffset = 0 + (stringHeight / 2) - (this._contentSize.height/2);
+        else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER) this._yOffset = 0 + (stringHeight / 2) - (this._contentSize.height / 2);
         else if (this._vAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) this._yOffset = 0;
     },
 
@@ -394,14 +364,14 @@ cc.ui.LabelTTF = cc.ui.Component.extend({ /** @lends cc.LabelTTFWebGL# */
      * renders the label
      * @param {CanvasContext|Null} ctx
      */
-    draw : function (ctx) {
+    draw: function (ctx) {
         var context = ctx || cc.renderContext;
-
-
-        context.font = this._labelContext.font;
+        //this is fillText for canvas
         context.fillStyle = this._colorStyleStr;
-        context.fillText(this._string, this._xOffset, this._yOffset);
 
+        if (context.font != this._fontStyleStr) context.font = this._fontStyleStr;
+        context.fillText(this._string, this._xOffset, this._yOffset);
+        // For testing purposes only
         context.fillStyle = "rgba(255,0,0,0.2)";
         context.fillRect(0, 0, this._contentSize.width, -this._contentSize.height);
     }
