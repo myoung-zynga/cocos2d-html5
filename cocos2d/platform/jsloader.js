@@ -137,6 +137,7 @@
         'base_nodes/CCdomNode.js',
         '../CocosDenshion/SimpleAudioEngine.js',
         'ui/CCUI.js',
+        'ui/CCUIBackground.js',
         'ui/CCUIDevice.js',
         'ui/CCUIConstants.js',
         'ui/CCUIBorder.js',
